@@ -156,7 +156,7 @@ export default function AmbientSound() {
     
     try {
       // Create a unique ID for this player instance
-      const playerId = `youtube-player-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      const playerId = `youtube-player-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`
       const container = youtubeContainerRef.current
       
       // Always set a new unique ID to avoid conflicts
@@ -321,7 +321,6 @@ export default function AmbientSound() {
         <audio
           ref={audioRef}
           loop
-          volume={0.3}
           src={musicUrl}
         />
       )}

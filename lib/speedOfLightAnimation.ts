@@ -1,8 +1,14 @@
 import { gsap } from 'gsap'
 
 export function createSpeedOfLightAnimation(onComplete?: () => void) {
+  // Check if we're in browser environment
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    if (onComplete) onComplete()
+    return () => {}
+  }
+  
   // Create warp speed effect container with unique ID
-  const containerId = `warp-container-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+  const containerId = `warp-container-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`
   const warpContainer = document.createElement('div')
   warpContainer.id = containerId
   warpContainer.className = 'fixed inset-0 z-50 pointer-events-none'
@@ -32,7 +38,7 @@ export function createSpeedOfLightAnimation(onComplete?: () => void) {
     }, 10)
   }
   
-  let cleanupTimer: NodeJS.Timeout | null = null
+  let cleanupTimer: ReturnType<typeof setTimeout> | null = null
   const stars: HTMLElement[] = []
   
   // Animate warp speed
