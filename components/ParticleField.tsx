@@ -12,13 +12,6 @@ export default function ParticleField() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const resize = () => {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
-    }
-    resize()
-    window.addEventListener('resize', resize)
-
     class Particle {
       x: number
       y: number
@@ -27,10 +20,14 @@ export default function ParticleField() {
       speedY: number
       opacity: number
       twinkleSpeed: number
+      canvasWidth: number
+      canvasHeight: number
 
-      constructor() {
-        this.x = Math.random() * canvas.width
-        this.y = Math.random() * canvas.height
+      constructor(canvasWidth: number, canvasHeight: number) {
+        this.canvasWidth = canvasWidth
+        this.canvasHeight = canvasHeight
+        this.x = Math.random() * canvasWidth
+        this.y = Math.random() * canvasHeight
         this.radius = Math.random() * 2 + 0.5
         this.speedX = (Math.random() - 0.5) * 0.5
         this.speedY = (Math.random() - 0.5) * 0.5
@@ -42,8 +39,8 @@ export default function ParticleField() {
         this.x += this.speedX
         this.y += this.speedY
 
-        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1
-        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1
+        if (this.x < 0 || this.x > this.canvasWidth) this.speedX *= -1
+        if (this.y < 0 || this.y > this.canvasHeight) this.speedY *= -1
 
         this.opacity += Math.sin(Date.now() * this.twinkleSpeed) * 0.01
         this.opacity = Math.max(0.2, Math.min(0.8, this.opacity))
@@ -67,8 +64,21 @@ export default function ParticleField() {
     const particles: Particle[] = []
     const particleCount = 100
 
+    const handleResize = () => {
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+      // Update canvas dimensions in particles when resized
+      particles.forEach(particle => {
+        particle.canvasWidth = canvas.width
+        particle.canvasHeight = canvas.height
+      })
+    }
+    
+    handleResize()
+    window.addEventListener('resize', handleResize)
+
     for (let i = 0; i < particleCount; i++) {
-      particles.push(new Particle())
+      particles.push(new Particle(canvas.width, canvas.height))
     }
 
     const animate = () => {
@@ -85,7 +95,7 @@ export default function ParticleField() {
     animate()
 
     return () => {
-      window.removeEventListener('resize', resize)
+      window.removeEventListener('resize', handleResize)
     }
   }, [])
 
