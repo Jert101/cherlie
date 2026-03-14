@@ -62,15 +62,27 @@ export default function CodeEntry() {
     setLoading(true)
 
     try {
-      if (!settings) {
+      let currentSettings = settings
+      if (!currentSettings) {
         await loadSettings()
+        // Reload settings after fetching
+        const { data } = await supabase
+          .from('site_settings')
+          .select('*')
+          .single()
+        currentSettings = data
       }
 
-      if (code === settings?.gf_code) {
+      if (!currentSettings) {
+        setError('Unable to load settings. Please try again.')
+        return
+      }
+
+      if (code === currentSettings.gf_code) {
         // GF code - go to welcome screen
         localStorage.setItem('userRole', 'gf')
         router.push('/welcome')
-      } else if (code === settings.admin_code) {
+      } else if (code === currentSettings.admin_code) {
         // Admin code - go to admin panel
         localStorage.setItem('userRole', 'admin')
         router.push('/admin')
