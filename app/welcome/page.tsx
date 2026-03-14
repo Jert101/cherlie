@@ -15,7 +15,7 @@ export default function WelcomePage() {
   useEffect(() => {
     setMounted(true)
     const role = localStorage.getItem('userRole')
-    if (role !== 'gf') {
+    if (role !== 'gf' && role !== 'bf') {
       router.push('/')
       return
     }

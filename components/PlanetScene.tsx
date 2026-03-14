@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useMemo } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Mesh, Group, Vector3 } from 'three'
 import { Text, Float, Image, Billboard } from '@react-three/drei'
@@ -19,6 +19,21 @@ export default function PlanetScene({ onEnterWorld }: PlanetSceneProps) {
   const [settings, setSettings] = useState<SiteSettings | null>(null)
   const [memories, setMemories] = useState<Memory[]>([])
   const [hovered, setHovered] = useState(false)
+
+  const memoryStarPositions = useMemo(() => {
+    if (!memories.length) return [] as [number, number, number][]
+    const count = Math.min(memories.length, 24)
+    const radius = 9
+    const height = 3.5
+
+    return memories.slice(0, count).map((_, index) => {
+      const angle = (index / count) * Math.PI * 2
+      const x = Math.cos(angle) * radius
+      const z = Math.sin(angle) * radius
+      const y = height + ((index % 3) - 1) * 0.4
+      return [x, y, z] as [number, number, number]
+    })
+  }, [memories])
 
   useEffect(() => {
     loadSettings()
@@ -196,11 +211,19 @@ export default function PlanetScene({ onEnterWorld }: PlanetSceneProps) {
         
       </group>
 
+      {/* Memory stars in the sky around the planet */}
+      {memoryStarPositions.map((pos, idx) => (
+        <mesh key={`memory-sky-star-${idx}`} position={pos} raycast={() => null}>
+          <sphereGeometry args={[0.08, 8, 8]} />
+          <meshBasicMaterial color="#F9A8D4" />
+        </mesh>
+      ))}
+
       {/* Rotating Ring of Memory Images - asteroid-like, always facing camera */}
       {memories.length > 0 && (() => {
         // Create a ring with all memories, multiplied to fill it completely
         const imagesPerRing = 100 // Increased number of images to show in the ring
-        const baseRadius = 5.5 // Widened ring to prevent photos from touching
+        const baseRadius = 6.5 // Widened ring to prevent photos from touching
         const baseY = 0 // Keep flat horizontal plane
         
         // Duplicate memories to fill the ring if we have fewer memories than imagesPerRing

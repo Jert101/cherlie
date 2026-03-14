@@ -82,6 +82,10 @@ export default function CodeEntry() {
         // GF code - go to welcome screen
         localStorage.setItem('userRole', 'gf')
         router.push('/welcome')
+      } else if (currentSettings.bf_code && code === currentSettings.bf_code) {
+        // BF code - secret access to GF world
+        localStorage.setItem('userRole', 'bf')
+        router.push('/welcome')
       } else if (code === currentSettings.admin_code) {
         // Admin code - go to admin panel
         localStorage.setItem('userRole', 'admin')

@@ -8,8 +8,16 @@ import LettersPanel from './panels/LettersPanel'
 import SurprisesPanel from './panels/SurprisesPanel'
 import GamesPanel from './panels/GamesPanel'
 import SettingsPanel from './panels/SettingsPanel'
+import DailyMessagesPanel from './panels/DailyMessagesPanel'
 
-type Panel = 'dashboard' | 'memories' | 'letters' | 'surprises' | 'games' | 'settings'
+type Panel =
+  | 'dashboard'
+  | 'memories'
+  | 'letters'
+  | 'surprises'
+  | 'games'
+  | 'daily-messages'
+  | 'settings'
 
 export default function AdminDashboard() {
   const [activePanel, setActivePanel] = useState<Panel>('dashboard')
@@ -62,6 +70,7 @@ export default function AdminDashboard() {
             {activePanel === 'letters' && <LettersPanel />}
             {activePanel === 'surprises' && <SurprisesPanel />}
             {activePanel === 'games' && <GamesPanel />}
+            {activePanel === 'daily-messages' && <DailyMessagesPanel />}
             {activePanel === 'settings' && <SettingsPanel />}
           </div>
         </div>

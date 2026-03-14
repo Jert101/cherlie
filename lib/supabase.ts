@@ -53,6 +53,7 @@ export interface SiteSettings {
   gf_name: string
   gf_code: string
   admin_code: string
+  bf_code?: string
   time_lock_enabled: boolean
   unlock_date: string | null
   music_url: string | null
@@ -60,3 +61,24 @@ export interface SiteSettings {
   planet_rotation_speed: number
   final_message: string
 }
+
+export interface Wish {
+  id: string
+  message: string
+  created_at: string
+  visible: boolean
+}
+
+export interface DailyMessage {
+  id: string
+  message: string
+  order_index: number
+  visible: boolean
+}
+
+export interface VisitStats {
+  id: string
+  visit_count: number
+  last_visit: string
+}
+

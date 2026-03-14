@@ -1,6 +1,13 @@
 'use client'
 
-type Panel = 'dashboard' | 'memories' | 'letters' | 'surprises' | 'games' | 'settings'
+type Panel =
+  | 'dashboard'
+  | 'memories'
+  | 'letters'
+  | 'surprises'
+  | 'games'
+  | 'daily-messages'
+  | 'settings'
 
 interface AdminNavProps {
   activePanel: Panel
@@ -14,6 +21,7 @@ export default function AdminNav({ activePanel, onPanelChange }: AdminNavProps) 
     { id: 'letters', label: 'Letters', icon: '💌' },
     { id: 'surprises', label: 'Surprises', icon: '⭐' },
     { id: 'games', label: 'Games', icon: '🎮' },
+    { id: 'daily-messages', label: 'Daily Messages', icon: '📅' },
     { id: 'settings', label: 'Settings', icon: '⚙️' },
   ]
 
