@@ -1,0 +1,25 @@
+{
+  "name": "SoLuna",
+  "short_name": "SoLuna",
+  "description": "A romantic, interactive world for us",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0a0f",
+  "theme_color": "#1a0f1a",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/SoLuna.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/SoLuna.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

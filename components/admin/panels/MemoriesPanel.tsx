@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase, Memory } from '@/lib/supabase'
+import { formatDateInPH } from '@/lib/dateUtils'
 import MemoryForm from './forms/MemoryForm'
 
 export default function MemoriesPanel() {
@@ -114,7 +115,7 @@ export default function MemoriesPanel() {
             <h3 className="font-bold text-pink-300 mb-1">{memory.title}</h3>
             <p className="text-sm text-purple-200 mb-2 line-clamp-2">{memory.description}</p>
             <div className="flex justify-between text-xs text-purple-300 mb-3">
-              <span>{new Date(memory.date).toLocaleDateString()}</span>
+              <span>{formatDateInPH(memory.date)}</span>
               {memory.location && <span>{memory.location}</span>}
             </div>
             <div className="flex gap-2">

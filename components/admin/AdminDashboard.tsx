@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation'
 import AdminNav from './AdminNav'
 import MemoriesPanel from './panels/MemoriesPanel'
 import LettersPanel from './panels/LettersPanel'
+import PoemsPanel from './panels/PoemsPanel'
 import SurprisesPanel from './panels/SurprisesPanel'
+import WishesPanel from './panels/WishesPanel'
 import GamesPanel from './panels/GamesPanel'
 import SettingsPanel from './panels/SettingsPanel'
 import DailyMessagesPanel from './panels/DailyMessagesPanel'
@@ -14,7 +16,9 @@ type Panel =
   | 'dashboard'
   | 'memories'
   | 'letters'
+  | 'poems'
   | 'surprises'
+  | 'wishes'
   | 'games'
   | 'daily-messages'
   | 'settings'
@@ -38,7 +42,7 @@ export default function AdminDashboard() {
               <h1 className="text-4xl font-bold text-handwritten text-pink-300 mb-2">
                 Admin Panel
               </h1>
-              <p className="text-purple-200">Manage "Our World" content</p>
+              <p className="text-purple-200">Manage "SoLuna" content</p>
             </div>
             <div className="flex-1 flex justify-end">
               <button
@@ -55,23 +59,27 @@ export default function AdminDashboard() {
           {/* Sidebar Navigation */}
           <AdminNav activePanel={activePanel} onPanelChange={setActivePanel} />
 
-          {/* Main Content */}
+          {/* Main Content — single keyed child to avoid removeChild errors when switching panels */}
           <div className="flex-1 bg-purple-900/40 backdrop-blur-sm rounded-2xl border-2 border-purple-500/30 p-6">
-            {activePanel === 'dashboard' && (
-              <div className="text-center py-12">
-                <div className="text-6xl mb-4">🎛️</div>
-                <h2 className="text-3xl font-bold text-pink-300 mb-4">Welcome to Admin Panel</h2>
-                <p className="text-purple-200 text-lg">
-                  Select a section from the sidebar to manage content
-                </p>
-              </div>
-            )}
-            {activePanel === 'memories' && <MemoriesPanel />}
-            {activePanel === 'letters' && <LettersPanel />}
-            {activePanel === 'surprises' && <SurprisesPanel />}
-            {activePanel === 'games' && <GamesPanel />}
-            {activePanel === 'daily-messages' && <DailyMessagesPanel />}
-            {activePanel === 'settings' && <SettingsPanel />}
+            <div key={activePanel}>
+              {activePanel === 'dashboard' && (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">🎛️</div>
+                  <h2 className="text-3xl font-bold text-pink-300 mb-4">Welcome to Admin Panel</h2>
+                  <p className="text-purple-200 text-lg">
+                    Select a section from the sidebar to manage content
+                  </p>
+                </div>
+              )}
+              {activePanel === 'memories' && <MemoriesPanel />}
+              {activePanel === 'letters' && <LettersPanel />}
+              {activePanel === 'poems' && <PoemsPanel />}
+              {activePanel === 'surprises' && <SurprisesPanel />}
+              {activePanel === 'wishes' && <WishesPanel />}
+              {activePanel === 'games' && <GamesPanel />}
+              {activePanel === 'daily-messages' && <DailyMessagesPanel />}
+              {activePanel === 'settings' && <SettingsPanel />}
+            </div>
           </div>
         </div>
       </div>

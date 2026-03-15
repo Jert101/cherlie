@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS games (
 -- Site settings table (single row)
 CREATE TABLE IF NOT EXISTS site_settings (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  site_name VARCHAR(255) DEFAULT 'Our World',
+  site_name VARCHAR(255) DEFAULT 'SoLuna',
   gf_name VARCHAR(255) DEFAULT 'baby',
   gf_code VARCHAR(100) DEFAULT 'love2024',
   admin_code VARCHAR(100) DEFAULT 'admin2024',
@@ -78,7 +78,7 @@ BEGIN
         ) THEN
             -- New structure with site_name and gf_name
             INSERT INTO site_settings (id, site_name, gf_name, gf_code, admin_code)
-            VALUES ('00000000-0000-0000-0000-000000000000', 'Our World', 'baby', 'love2024', 'admin2024');
+            VALUES ('00000000-0000-0000-0000-000000000000', 'SoLuna', 'baby', 'love2024', 'admin2024');
         ELSE
             -- Old structure without site_name and gf_name
             INSERT INTO site_settings (id, gf_code, admin_code)

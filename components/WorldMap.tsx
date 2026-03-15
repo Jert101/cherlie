@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { toPng } from 'html-to-image'
-import { supabase, Memory, Letter, Surprise, Wish, DailyMessage } from '@/lib/supabase'
+import { supabase, Memory, Letter, Poem, Surprise, Wish, DailyMessage } from '@/lib/supabase'
 import { buildMemoryStarsFromMemories, type MemoryStarData } from '@/lib/starUtils'
+import { getDayIndexInPH, formatDateInPH } from '@/lib/dateUtils'
 import { isYouTubeUrl, extractYouTubeId, getYouTubeEmbedUrlWithControls } from '@/lib/youtubeUtils'
 import WorldStarSky from './stars/WorldStarSky'
 import MemoryGarden from './locations/MemoryGarden'
 import LoveLetterHouse from './locations/LoveLetterHouse'
+import RiverOfPoem from './locations/RiverOfPoem'
 import GameArcade from './locations/GameArcade'
 import StarHill from './locations/StarHill'
 import FinalCliff from './locations/FinalCliff'
@@ -18,7 +20,7 @@ import HeartCatcher from './games/HeartCatcher'
 import SayILoveYou from './games/SayILoveYou'
 import FinalCliffModal from './locations/FinalCliffModal'
 
-type Location = 'memory-garden' | 'love-letter-house' | 'game-arcade' | 'star-hill' | 'final-cliff' | 'moon' | null
+type Location = 'memory-garden' | 'love-letter-house' | 'river-of-poem' | 'game-arcade' | 'star-hill' | 'final-cliff' | 'moon' | null
 
 interface WorldMapProps {
   visitCount: number
@@ -28,6 +30,7 @@ export default function WorldMap({ visitCount }: WorldMapProps) {
   const [activeLocation, setActiveLocation] = useState<Location>(null)
   const [memories, setMemories] = useState<Memory[]>([])
   const [letters, setLetters] = useState<Letter[]>([])
+  const [poems, setPoems] = useState<Poem[]>([])
   const [surprises, setSurprises] = useState<Surprise[]>([])
   const [wishes, setWishes] = useState<Wish[]>([])
   const [isCreatingWish, setIsCreatingWish] = useState(false)
@@ -43,9 +46,7 @@ export default function WorldMap({ visitCount }: WorldMapProps) {
 
   const todaysMessage = useMemo(() => {
     if (!dailyMessages.length) return null
-    const today = new Date()
-    const dayIndex =
-      today.getFullYear() * 1000 + today.getMonth() * 50 + today.getDate()
+    const dayIndex = getDayIndexInPH()
     const visibleMessages = dailyMessages.filter((m) => m.visible)
     if (!visibleMessages.length) return null
     const index = Math.abs(dayIndex) % visibleMessages.length
@@ -86,6 +87,15 @@ export default function WorldMap({ visitCount }: WorldMapProps) {
         .order('order_index', { ascending: true })
 
       if (letterData) setLetters(letterData)
+
+      // Load visible poems (River of Poem)
+      const { data: poemData } = await supabase
+        .from('poems')
+        .select('*')
+        .eq('visible', true)
+        .order('order_index', { ascending: true })
+
+      if (poemData) setPoems(poemData)
 
       // Load visible surprises
       const { data: surpriseData } = await supabase
@@ -205,7 +215,7 @@ export default function WorldMap({ visitCount }: WorldMapProps) {
             <div className="w-full max-w-xl rounded-2xl bg-purple-900/70 border border-pink-500/50 px-4 py-2.5 shadow-lg backdrop-blur-sm animate-pulse-glow z-10">
               <p className="text-xs md:text-sm text-center text-pink-100">
                 <span className="font-semibold text-pink-300 mr-1">
-                  Today&apos;s message from me:
+                  Today&apos;s message from Solpie:
                 </span>
                 {todaysMessage.message}
               </p>
@@ -234,7 +244,7 @@ export default function WorldMap({ visitCount }: WorldMapProps) {
           {/* Map title */}
           <div className="absolute top-3 left-0 right-0 z-10 text-center md:top-5">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-pink-200/95 text-handwritten drop-shadow-md">
-              Our World
+              SoLuna
             </h2>
             <p className="text-[10px] sm:text-xs text-purple-300/80 mt-0.5 tracking-widest uppercase">
               Our constellation
@@ -256,6 +266,7 @@ export default function WorldMap({ visitCount }: WorldMapProps) {
               </svg>
               <MapPinSpot icon="🌺" label="Memory Garden" subtitle={`${memories.length} memories`} onClick={() => handleLocationClick('memory-garden')} />
               <MapPinSpot icon="💌" label="Love Letter House" subtitle={`${letters.length} letters`} onClick={() => handleLocationClick('love-letter-house')} />
+              <MapPinSpot icon="🌊" label="River of Poem" subtitle={`${poems.length} poems`} onClick={() => handleLocationClick('river-of-poem')} />
               <MapPinSpot icon="🎮" label="Game Arcade" subtitle="Play together" onClick={() => handleLocationClick('game-arcade')} />
               <MapPinSpot icon="⭐" label="Star Hill" subtitle={`${surprises.length} surprises`} onClick={() => handleLocationClick('star-hill')} />
               <MapPinSpot icon="🌅" label="Final Cliff" subtitle="Where our story peaks" onClick={() => handleLocationClick('final-cliff')} />
@@ -286,6 +297,7 @@ export default function WorldMap({ visitCount }: WorldMapProps) {
               <MapPinSpot icon="🎮" label="Game Arcade" subtitle="Play together" onClick={() => handleLocationClick('game-arcade')} className="constellation-star absolute left-1/2 top-[12.5%] -translate-x-1/2 -translate-y-1/2" />
               <MapPinSpot icon="🌺" label="Memory Garden" subtitle={`${memories.length} memories`} onClick={() => handleLocationClick('memory-garden')} className="constellation-star absolute left-[22%] top-[30%] -translate-x-1/2 -translate-y-1/2" />
               <MapPinSpot icon="💌" label="Love Letter House" subtitle={`${letters.length} letters`} onClick={() => handleLocationClick('love-letter-house')} className="constellation-star absolute right-[22%] top-[30%] translate-x-1/2 -translate-y-1/2" />
+              <MapPinSpot icon="🌊" label="River of Poem" subtitle={`${poems.length} poems`} onClick={() => handleLocationClick('river-of-poem')} className="constellation-star absolute left-1/2 top-[50%] -translate-x-1/2 -translate-y-1/2" />
               <MapPinSpot icon="⭐" label="Star Hill" subtitle={`${surprises.length} surprises`} onClick={() => handleLocationClick('star-hill')} className="constellation-star absolute left-[22%] bottom-[28%] -translate-x-1/2 translate-y-1/2" />
               <MapPinSpot icon="🌅" label="Final Cliff" subtitle="Where our story peaks" onClick={() => handleLocationClick('final-cliff')} className="constellation-star absolute right-[22%] bottom-[28%] translate-x-1/2 translate-y-1/2" />
               {visitCount >= 10 && (
@@ -364,7 +376,7 @@ export default function WorldMap({ visitCount }: WorldMapProps) {
                       {selectedMemory.title}
                     </h3>
                     <div className="text-xs md:text-sm text-purple-200 flex flex-wrap gap-3">
-                      <span className="italic">Remember when — {new Date(selectedMemory.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                      <span className="italic">Remember when — {formatDateInPH(selectedMemory.date, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
                       {selectedMemory.location && <span>📍 {selectedMemory.location}</span>}
                     </div>
                     <p className="text-sm md:text-base text-purple-100 whitespace-pre-wrap leading-relaxed">
@@ -455,6 +467,46 @@ export default function WorldMap({ visitCount }: WorldMapProps) {
               <div className="space-y-4 relative z-10">
                 {letters.map((letter) => (
                   <LetterCard key={letter.id} letter={letter} />
+                ))}
+              </div>
+            )}
+          </div>
+        </LocationModal>
+      )}
+
+      {activeLocation === 'river-of-poem' && (
+        <LocationModal
+          title="River of Poem"
+          onClose={handleCloseModal}
+        >
+          <div className="space-y-5 max-h-[70vh] overflow-y-auto p-4 relative">
+            <p className="text-center text-sm md:text-base text-cyan-100/95 text-handwritten px-2">
+              Every line I write flows to you like a river. These poems are yours.
+            </p>
+            <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
+              {[...Array(6)].map((_, i) => (
+                <span
+                  key={i}
+                  className="absolute text-base opacity-15 animate-float"
+                  style={{
+                    left: `${10 + (i * 18) % 80}%`,
+                    top: `${15 + (i * 12) % 75}%`,
+                    animationDuration: `${5 + (i % 3)}s`,
+                    animationDelay: `${i * 0.35}s`,
+                  }}
+                >
+                  ✨
+                </span>
+              ))}
+            </div>
+            {poems.length === 0 ? (
+              <p className="text-center text-purple-200/80 text-sm py-8 text-handwritten">
+                The river is still — but I&apos;m already writing the next one for you.
+              </p>
+            ) : (
+              <div className="space-y-5 relative z-10">
+                {poems.map((poem) => (
+                  <PoemCard key={poem.id} poem={poem} />
                 ))}
               </div>
             )}
@@ -570,7 +622,7 @@ function MemoryCard({ memory, isSelected = false }: { memory: Memory; isSelected
       <h3 className="font-bold text-pink-300 mb-1 truncate text-handwritten">{memory.title}</h3>
       <p className="text-sm text-purple-200 mb-2 line-clamp-3 break-words overflow-hidden">{memory.description}</p>
       <div className="flex justify-between text-xs text-purple-300">
-        <span>📅 {new Date(memory.date).toLocaleDateString()}</span>
+        <span>📅 {formatDateInPH(memory.date)}</span>
         {memory.location && <span>📍 {memory.location}</span>}
       </div>
       <p className="mt-2 text-[10px] text-pink-300/60 italic">Tap to relive this moment</p>
@@ -648,6 +700,40 @@ function LetterCard({ letter }: { letter: Letter }) {
             </div>
           )}
         </div>
+      </div>
+    </button>
+  )
+}
+
+// Poem Card — river-themed, romantic (admin-added poems)
+function PoemCard({ poem }: { poem: Poem }) {
+  const [expanded, setExpanded] = useState(false)
+
+  return (
+    <button
+      type="button"
+      onClick={() => setExpanded((v) => !v)}
+      className="w-full text-left px-1 md:px-2 group/card"
+    >
+      <div className={`relative rounded-2xl border transition-all duration-300 overflow-hidden ${expanded ? 'bg-gradient-to-br from-cyan-900/40 via-purple-900/50 to-pink-900/30 border-cyan-500/40 shadow-[0_0_24px_rgba(34,211,238,0.15)]' : 'bg-gradient-to-br from-cyan-900/20 via-purple-900/40 to-pink-900/20 border-cyan-500/30 hover:border-pink-500/40 hover:glow-soft'}`}>
+        {/* Top wave accent */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent" />
+        <div className="p-4 md:p-5 relative">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-2xl opacity-80">🌊</span>
+            <h3 className="text-lg md:text-xl font-bold text-handwritten text-cyan-200">
+              {poem.title}
+            </h3>
+          </div>
+          <p className={`text-sm text-purple-100 whitespace-pre-wrap leading-relaxed ${expanded ? '' : 'line-clamp-4'}`}>
+            {poem.body}
+          </p>
+          <p className="mt-3 text-xs text-cyan-200/70 italic">
+            {expanded ? 'Tap to fold' : 'Tap to read more'}
+          </p>
+        </div>
+        {/* Bottom shimmer */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-pink-400/30 to-transparent" />
       </div>
     </button>
   )

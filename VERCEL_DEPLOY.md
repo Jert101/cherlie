@@ -1,6 +1,6 @@
 # Deploying to Vercel
 
-This guide will help you deploy your "Our World" application to Vercel.
+This guide will help you deploy your "SoLuna" application to Vercel.
 
 ## Prerequisites
 

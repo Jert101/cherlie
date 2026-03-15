@@ -139,7 +139,7 @@ export default function SettingsPanel() {
             onChange={(e) => setSettings({ ...settings, site_name: e.target.value })}
             required
             className="w-full px-4 py-2 rounded-lg bg-purple-800/50 border border-purple-500/50 text-white focus:outline-none focus:border-pink-500"
-            placeholder="Our World"
+            placeholder="SoLuna"
           />
           <p className="text-xs text-purple-300 mt-1">
             This name appears on the code entry page

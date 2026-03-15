@@ -25,3 +25,10 @@ create policy "Anyone can insert wishes"
   for insert
   with check (true);
 
+-- Allow reading all wishes (for admin panel: BF can see every wish from Star Hill).
+-- Star Hill still shows only visible wishes in the app via .eq('visible', true).
+create policy "Allow read all wishes for admin"
+  on public.wishes
+  for select
+  using (true);
+

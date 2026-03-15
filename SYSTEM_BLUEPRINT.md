@@ -1,4 +1,4 @@
-## System Blueprint – “Our World”
+## System Blueprint – “SoLuna”
 
 ### 1. High‑Level Concept
 
@@ -96,7 +96,7 @@ Defined in `lib/supabase.ts`:
 - **`CodeEntry`**
   - Full‑screen `cosmic-gradient` background with `ParticleField`.
   - Loads `site_settings` to show:
-    - `site_name` as the title (e.g. “Our World”).
+    - `site_name` as the title (e.g. “SoLuna”).
     - Time lock state (`time_lock_enabled`, `unlock_date`).
   - If time‑locked:
     - Displays a live countdown until unlock.

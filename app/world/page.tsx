@@ -21,54 +21,44 @@ export default function WorldPage() {
 
     const updateVisitStats = async () => {
       try {
-        const statsIdBase = 'gf_world'
-        const shouldIncrementGf = role === 'gf'
-
-        // Always load gf_world stats for unlocking logic
-        const { data, error } = await supabase
+        // Use gf_welcome so the count matches the welcome page ("3rd time" = same number here and for moon)
+        const WELCOME_STATS_ID = 'gf_welcome'
+        const { data: welcomeData, error: welcomeError } = await supabase
           .from('visit_stats')
           .select('*')
-          .eq('id', statsIdBase)
+          .eq('id', WELCOME_STATS_ID)
           .limit(1)
 
-        if (error) throw error
+        if (welcomeError) throw welcomeError
+        const welcomeRow = welcomeData && welcomeData.length > 0 ? welcomeData[0] : null
+        const count = welcomeRow ? welcomeRow.visit_count || 0 : 0
 
-        const existing = data && data.length > 0 ? data[0] : null
-        let nextCount = existing ? existing.visit_count || 0 : 0
-
-        if (shouldIncrementGf) {
-          if (existing) {
-            nextCount = (existing.visit_count || 0) + 1
-            await supabase
-              .from('visit_stats')
-              .update({
-                visit_count: nextCount,
-                last_visit: new Date().toISOString(),
-              })
-              .eq('id', statsIdBase)
-          } else {
-            const { data: inserted, error: insertError } = await supabase
-              .from('visit_stats')
-              .insert({
-                id: statsIdBase,
-                visit_count: 1,
-                last_visit: new Date().toISOString(),
-              })
-              .select('*')
-
-            if (insertError) throw insertError
-            if (inserted && inserted.length > 0) {
-              nextCount = inserted[0].visit_count
+        // Keep gf_world in sync for admin panel and moon unlock (same count as gf_welcome)
+        if (role === 'gf' && count > 0) {
+          const { data: worldData } = await supabase
+            .from('visit_stats')
+            .select('*')
+            .eq('id', 'gf_world')
+            .limit(1)
+          const worldRow = worldData && worldData.length > 0 ? worldData[0] : null
+          const worldCount = worldRow ? worldRow.visit_count || 0 : 0
+          if (count > worldCount) {
+            if (worldRow) {
+              await supabase
+                .from('visit_stats')
+                .update({ visit_count: count, last_visit: new Date().toISOString() })
+                .eq('id', 'gf_world')
             } else {
-              nextCount = 1
+              await supabase
+                .from('visit_stats')
+                .insert({ id: 'gf_world', visit_count: count, last_visit: new Date().toISOString() })
             }
           }
         }
 
-        setVisitCount(nextCount)
+        setVisitCount(count > 0 ? count : 1)
       } catch (err) {
         console.error('Error updating visit stats:', err)
-        // Fallback: at least allow page to render
         setVisitCount(1)
       }
     }
@@ -76,9 +66,8 @@ export default function WorldPage() {
     updateVisitStats()
   }, [router])
 
-  const handleLogout = () => {
-    localStorage.removeItem('userRole')
-    router.push('/')
+  const handleBackToPlanet = () => {
+    router.push('/planet')
   }
 
   if (!mounted || visitCount === null) {
@@ -98,12 +87,16 @@ export default function WorldPage() {
         <ParticleField />
       </div>
       <button
-        onClick={handleLogout}
-        className="fixed top-4 right-4 z-50 px-4 py-2 rounded-xl bg-purple-900/60 backdrop-blur-sm border-2 border-purple-500/50 hover:border-pink-500/50 text-purple-200 hover:text-pink-300 transition-all duration-300 text-sm font-semibold hover:glow-soft"
+        onClick={handleBackToPlanet}
+        className="fixed top-4 right-4 z-50 px-4 py-2 rounded-xl bg-purple-900/60 backdrop-blur-sm border-2 border-purple-500/50 hover:border-pink-500/50 text-purple-200 hover:text-pink-300 transition-all duration-300 text-sm font-semibold hover:glow-soft flex items-center gap-1.5"
       >
-        Logout
+        <span aria-hidden>🌍</span>
+        Back to the planet
       </button>
-      <WorldMap visitCount={visitCount} />
+      {/* Top spacer so button never overlaps Today's message */}
+      <div className="pt-14">
+        <WorldMap visitCount={visitCount} />
+      </div>
     </div>
   )
 }

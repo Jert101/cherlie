@@ -30,6 +30,15 @@ export interface Letter {
   created_at?: string
 }
 
+export interface Poem {
+  id: string
+  title: string
+  body: string
+  order_index: number
+  visible: boolean
+  created_at?: string
+}
+
 export interface Surprise {
   id: string
   type: 'message' | 'audio' | 'image'

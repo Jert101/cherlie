@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { gsap } from 'gsap'
 
 interface LocationModalProps {
@@ -9,42 +10,62 @@ interface LocationModalProps {
   onClose: () => void
 }
 
+// Root cause of removeChild error: GSAP animates nodes that React owns. When we close,
+// React unmounts in the same tick as GSAP's onComplete, so the DOM tree can be in a
+// state where React's expectation (node still in parent) is wrong. Fix: portal to a
+// stable container, kill GSAP on unmount, and defer parent state update.
+function getModalRoot(): HTMLElement {
+  if (typeof document === 'undefined') return null!
+  let root = document.getElementById('location-modal-root')
+  if (!root) {
+    root = document.createElement('div')
+    root.id = 'location-modal-root'
+    document.body.appendChild(root)
+  }
+  return root
+}
+
 export default function LocationModal({ title, children, onClose }: LocationModalProps) {
   const modalRef = useRef<HTMLDivElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (modalRef.current && overlayRef.current) {
-      gsap.fromTo(overlayRef.current, 
-        { opacity: 0 },
-        { opacity: 1, duration: 0.3 }
-      )
+      gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3 })
       gsap.fromTo(modalRef.current,
         { opacity: 0, scale: 0.9, y: 50 },
         { opacity: 1, scale: 1, y: 0, duration: 0.4, ease: 'power3.out' }
       )
     }
+    return () => {
+      if (modalRef.current) gsap.killTweensOf(modalRef.current)
+      if (overlayRef.current) gsap.killTweensOf(overlayRef.current)
+    }
   }, [])
 
   const handleClose = () => {
     if (modalRef.current && overlayRef.current) {
+      gsap.to(overlayRef.current, { opacity: 0, duration: 0.3 })
       gsap.to(modalRef.current, {
         opacity: 0,
         scale: 0.9,
         y: 50,
         duration: 0.3,
-        onComplete: onClose
-      })
-      gsap.to(overlayRef.current, {
-        opacity: 0,
-        duration: 0.3
+        onComplete: () => {
+          if (modalRef.current) gsap.killTweensOf(modalRef.current)
+          if (overlayRef.current) gsap.killTweensOf(overlayRef.current)
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => onClose())
+          })
+        }
       })
     } else {
       onClose()
     }
   }
 
-  return (
+  const modalRoot = typeof document !== 'undefined' ? getModalRoot() : null
+  const content = (
     <div
       ref={overlayRef}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
@@ -73,4 +94,7 @@ export default function LocationModal({ title, children, onClose }: LocationModa
       </div>
     </div>
   )
+
+  if (!modalRoot) return content
+  return createPortal(content, modalRoot)
 }

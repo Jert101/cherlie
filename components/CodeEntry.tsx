@@ -79,12 +79,14 @@ export default function CodeEntry() {
       }
 
       if (code === currentSettings.gf_code) {
-        // GF code - go to welcome screen
+        // GF code - go to welcome screen (flag so welcome only counts this as a new session)
         localStorage.setItem('userRole', 'gf')
+        if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('welcomeFromCodeEntry', '1')
         router.push('/welcome')
       } else if (currentSettings.bf_code && code === currentSettings.bf_code) {
         // BF code - secret access to GF world
         localStorage.setItem('userRole', 'bf')
+        if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('welcomeFromCodeEntry', '1')
         router.push('/welcome')
       } else if (code === currentSettings.admin_code) {
         // Admin code - go to admin panel
@@ -121,7 +123,7 @@ export default function CodeEntry() {
       <div className="relative z-10 w-full max-w-md px-6">
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 text-handwritten text-pink-300 glow-soft">
-            {settings?.site_name || 'Our World'}
+            {settings?.site_name || 'SoLuna'}
           </h1>
           <p className="text-purple-200 text-lg">Enter the key to begin</p>
         </div>

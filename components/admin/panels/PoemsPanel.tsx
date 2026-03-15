@@ -1,102 +1,102 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase, Letter } from '@/lib/supabase'
-import LetterForm from './forms/LetterForm'
+import { supabase, Poem } from '@/lib/supabase'
+import PoemForm from './forms/PoemForm'
 
-export default function LettersPanel() {
-  const [letters, setLetters] = useState<Letter[]>([])
+export default function PoemsPanel() {
+  const [poems, setPoems] = useState<Poem[]>([])
   const [loading, setLoading] = useState(true)
-  const [editing, setEditing] = useState<Letter | null>(null)
+  const [editing, setEditing] = useState<Poem | null>(null)
   const [showForm, setShowForm] = useState(false)
 
   useEffect(() => {
-    loadLetters()
+    loadPoems()
   }, [])
 
-  const loadLetters = async () => {
+  const loadPoems = async () => {
     try {
       const { data, error } = await supabase
-        .from('letters')
+        .from('poems')
         .select('*')
         .order('order_index', { ascending: true })
 
       if (error) throw error
-      setLetters(data || [])
+      setPoems(data || [])
     } catch (err) {
-      console.error('Error loading letters:', err)
-      alert('Error loading letters')
+      console.error('Error loading poems:', err)
+      alert('Error loading poems')
     } finally {
       setLoading(false)
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this letter?')) return
+    if (!confirm('Are you sure you want to delete this poem?')) return
 
     try {
       const { error } = await supabase
-        .from('letters')
+        .from('poems')
         .delete()
         .eq('id', id)
 
       if (error) throw error
-      loadLetters()
+      loadPoems()
     } catch (err) {
-      console.error('Error deleting letter:', err)
-      alert('Error deleting letter')
+      console.error('Error deleting poem:', err)
+      alert('Error deleting poem')
     }
   }
 
-  const handleToggleVisibility = async (letter: Letter) => {
+  const handleToggleVisibility = async (p: Poem) => {
     try {
       const { error } = await supabase
-        .from('letters')
-        .update({ visible: !letter.visible })
-        .eq('id', letter.id)
+        .from('poems')
+        .update({ visible: !p.visible })
+        .eq('id', p.id)
 
       if (error) throw error
-      loadLetters()
+      loadPoems()
     } catch (err) {
-      console.error('Error updating letter:', err)
-      alert('Error updating letter')
+      console.error('Error updating poem:', err)
+      alert('Error updating poem')
     }
   }
 
   const handleReorder = async (id: string, direction: 'up' | 'down') => {
-    const index = letters.findIndex((l) => l.id === id)
+    const index = poems.findIndex((p) => p.id === id)
     if (index === -1) return
 
     const newIndex = direction === 'up' ? index - 1 : index + 1
-    if (newIndex < 0 || newIndex >= letters.length) return
+    if (newIndex < 0 || newIndex >= poems.length) return
 
-    const orderA = letters[index].order_index
-    const orderB = letters[newIndex].order_index
+    const orderA = poems[index].order_index
+    const orderB = poems[newIndex].order_index
 
     try {
       await supabase
-        .from('letters')
+        .from('poems')
         .update({ order_index: orderB })
-        .eq('id', letters[index].id)
+        .eq('id', poems[index].id)
       await supabase
-        .from('letters')
+        .from('poems')
         .update({ order_index: orderA })
-        .eq('id', letters[newIndex].id)
-      loadLetters()
+        .eq('id', poems[newIndex].id)
+      loadPoems()
     } catch (err) {
-      console.error('Error reordering letters:', err)
-      alert('Error reordering letters')
+      console.error('Error reordering poems:', err)
+      alert('Error reordering poems')
     }
   }
 
   if (loading) {
-    return <div className="text-center py-12 text-purple-200">Loading letters...</div>
+    return <div className="text-center py-12 text-purple-200">Loading poems...</div>
   }
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-pink-300">Love Letters</h2>
+        <h2 className="text-2xl font-bold text-pink-300">River of Poem</h2>
         <button
           onClick={() => {
             setEditing(null)
@@ -104,57 +104,57 @@ export default function LettersPanel() {
           }}
           className="px-4 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-300"
         >
-          + Add Letter
+          + Add Poem
         </button>
       </div>
 
       {showForm && (
-        <LetterForm
-          letter={editing}
+        <PoemForm
+          poem={editing}
           onClose={() => {
             setShowForm(false)
             setEditing(null)
           }}
-          onSave={loadLetters}
+          onSave={loadPoems}
         />
       )}
 
       <div className="space-y-4">
-        {letters.map((letter, index) => (
+        {poems.map((poem, index) => (
           <div
-            key={letter.id}
+            key={poem.id}
             className="bg-purple-800/30 rounded-xl p-4 border border-purple-500/30"
           >
             <div className="flex items-start justify-between mb-2">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
-                  <span className="text-purple-300 text-sm">#{letter.order_index}</span>
-                  <h3 className="font-bold text-pink-300 text-xl">{letter.title}</h3>
-                  {!letter.visible && (
+                  <span className="text-purple-300 text-sm">#{poem.order_index}</span>
+                  <h3 className="font-bold text-pink-300 text-xl">{poem.title}</h3>
+                  {!poem.visible && (
                     <span className="text-red-300 text-sm font-bold">(Hidden)</span>
                   )}
                 </div>
-                <p className="text-purple-200 text-sm line-clamp-2">{letter.content}</p>
+                <p className="text-purple-200 text-sm line-clamp-3 whitespace-pre-wrap">{poem.body}</p>
               </div>
             </div>
-            <div className="flex gap-2 mt-4">
+            <div className="flex gap-2 mt-4 flex-wrap">
               <button
-                onClick={() => handleReorder(letter.id, 'up')}
+                onClick={() => handleReorder(poem.id, 'up')}
                 disabled={index === 0}
                 className="px-3 py-2 rounded-lg bg-purple-700/50 hover:bg-purple-600/50 text-sm transition-colors disabled:opacity-50"
               >
                 ↑
               </button>
               <button
-                onClick={() => handleReorder(letter.id, 'down')}
-                disabled={index === letters.length - 1}
+                onClick={() => handleReorder(poem.id, 'down')}
+                disabled={index === poems.length - 1}
                 className="px-3 py-2 rounded-lg bg-purple-700/50 hover:bg-purple-600/50 text-sm transition-colors disabled:opacity-50"
               >
                 ↓
               </button>
               <button
                 onClick={() => {
-                  setEditing(letter)
+                  setEditing(poem)
                   setShowForm(true)
                 }}
                 className="flex-1 px-3 py-2 rounded-lg bg-purple-700/50 hover:bg-purple-600/50 text-sm transition-colors"
@@ -162,17 +162,17 @@ export default function LettersPanel() {
                 Edit
               </button>
               <button
-                onClick={() => handleToggleVisibility(letter)}
+                onClick={() => handleToggleVisibility(poem)}
                 className={`flex-1 px-3 py-2 rounded-lg text-sm transition-colors ${
-                  letter.visible
+                  poem.visible
                     ? 'bg-green-700/50 hover:bg-green-600/50'
                     : 'bg-yellow-700/50 hover:bg-yellow-600/50'
                 }`}
               >
-                {letter.visible ? 'Hide' : 'Show'}
+                {poem.visible ? 'Hide' : 'Show'}
               </button>
               <button
-                onClick={() => handleDelete(letter.id)}
+                onClick={() => handleDelete(poem.id)}
                 className="px-3 py-2 rounded-lg bg-red-700/50 hover:bg-red-600/50 text-sm transition-colors"
               >
                 Delete
@@ -182,9 +182,9 @@ export default function LettersPanel() {
         ))}
       </div>
 
-      {letters.length === 0 && (
+      {poems.length === 0 && (
         <div className="text-center py-12 text-purple-300">
-          No letters yet. Add your first letter!
+          No poems yet. Add your first poem for her!
         </div>
       )}
     </div>

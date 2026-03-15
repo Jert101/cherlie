@@ -114,7 +114,7 @@ export default function PlanetScene({ onEnterWorld }: PlanetSceneProps) {
           document.body.style.cursor = 'auto'
         }}
       >
-        {/* Main Planet - bright pink with outline and surface details */}
+        {/* Main Planet — warm pink-gold with golden highlight */}
         <mesh position={[0, 0, 0]} renderOrder={1000}>
           <sphereGeometry args={[2, 64, 64]} />
           <shaderMaterial
@@ -122,7 +122,6 @@ export default function PlanetScene({ onEnterWorld }: PlanetSceneProps) {
               varying vec3 vWorldPosition;
               varying vec3 vNormal;
               varying vec2 vUv;
-              
               void main() {
                 vNormal = normalize(normalMatrix * normal);
                 vUv = uv;
@@ -135,74 +134,60 @@ export default function PlanetScene({ onEnterWorld }: PlanetSceneProps) {
               varying vec3 vWorldPosition;
               varying vec3 vNormal;
               varying vec2 vUv;
-              
               void main() {
-                // Bright hot pink base color (#FF69B4)
-                vec3 baseColor = vec3(1.0, 0.412, 0.706); // Hot pink
-                
-                // Add some surface variation/shadow details
-                float noise = sin(vUv.x * 15.0) * sin(vUv.y * 15.0) * 0.1;
-                float shadow = smoothstep(0.3, 0.7, vUv.y); // Darker at bottom
-                
-                // Add darker pink surface details (like craters/shadows)
+                vec3 pink = vec3(1.0, 0.45, 0.72);
+                vec3 gold = vec3(1.0, 0.85, 0.45);
+                float shadow = smoothstep(0.25, 0.75, vUv.y);
+                float goldHighlight = smoothstep(0.5, 0.85, vUv.y) * (0.5 + 0.5 * sin(vUv.x * 6.0));
+                vec3 baseColor = mix(pink, gold, goldHighlight * 0.35);
                 float detail1 = step(0.85, sin(vUv.x * 8.0 + vUv.y * 6.0));
                 float detail2 = step(0.88, sin(vUv.x * 12.0 - vUv.y * 10.0));
-                float detail3 = step(0.87, sin(vUv.x * 7.0 + vUv.y * 9.0));
-                
-                vec3 detailColor = vec3(0.627, 0.314, 0.439); // Darker pink (#A05070)
-                float detailMask = (detail1 + detail2 + detail3) * 0.3;
-                
-                // Mix base with shadows and details
-                vec3 finalColor = baseColor;
-                finalColor = mix(finalColor, finalColor * 0.85, shadow * 0.3);
-                finalColor = mix(finalColor, detailColor, detailMask);
-                
-                // Add subtle emissive glow
-                float emissive = 0.8;
-                
-                gl_FragColor = vec4(finalColor * emissive, 1.0);
+                vec3 detailColor = vec3(0.6, 0.35, 0.45);
+                baseColor = mix(baseColor, baseColor * 0.9, shadow * 0.25);
+                baseColor = mix(baseColor, detailColor, (detail1 + detail2) * 0.2);
+                float emissive = 0.88;
+                gl_FragColor = vec4(baseColor * emissive, 1.0);
               }
             `}
             side={2}
           />
         </mesh>
-        
-        {/* Darker pink outline ring */}
+
+        {/* Warm outline ring */}
         <mesh position={[0, 0, 0]} renderOrder={999}>
           <sphereGeometry args={[2.05, 64, 64]} />
           <meshStandardMaterial
-            color="#C75090"
+            color="#E9A855"
             emissive="#C75090"
-            emissiveIntensity={0.2}
+            emissiveIntensity={0.25}
             transparent
-            opacity={0.6}
-            side={1} // FrontSide only for outline effect
+            opacity={0.55}
+            side={1}
           />
         </mesh>
-        
-        {/* Planet atmosphere glow - intensifies on hover */}
+
+        {/* Atmosphere — golden-pink glow, stronger on hover */}
         <mesh position={[0, 0, 0]} renderOrder={999}>
           <sphereGeometry args={[2.1, 32, 32]} />
           <meshStandardMaterial
-            color="#EC4899"
+            color="#FBBF24"
             emissive="#EC4899"
-            emissiveIntensity={hovered ? 0.5 : 0.3}
+            emissiveIntensity={hovered ? 0.55 : 0.35}
             transparent
-            opacity={hovered ? 0.3 : 0.2}
-            side={2} // DoubleSide
+            opacity={hovered ? 0.35 : 0.22}
+            side={2}
           />
         </mesh>
-        
-        {/* Additional glow layer on hover */}
+
         {hovered && (
           <mesh position={[0, 0, 0]} renderOrder={998}>
             <sphereGeometry args={[2.2, 32, 32]} />
             <meshStandardMaterial
-              color="#EC4899"
-              emissive="#EC4899"
+              color="#FCD34D"
+              emissive="#F9A8D4"
               emissiveIntensity={0.4}
               transparent
-              opacity={0.15}
+              opacity={0.18}
               side={2}
             />
           </mesh>
@@ -211,11 +196,11 @@ export default function PlanetScene({ onEnterWorld }: PlanetSceneProps) {
         
       </group>
 
-      {/* Memory stars in the sky around the planet */}
+      {/* Memory stars — warm golden-pink */}
       {memoryStarPositions.map((pos, idx) => (
         <mesh key={`memory-sky-star-${idx}`} position={pos} raycast={() => null}>
-          <sphereGeometry args={[0.08, 8, 8]} />
-          <meshBasicMaterial color="#F9A8D4" />
+          <sphereGeometry args={[0.09, 8, 8]} />
+          <meshBasicMaterial color="#FCD34D" />
         </mesh>
       ))}
 
@@ -298,15 +283,15 @@ export default function PlanetScene({ onEnterWorld }: PlanetSceneProps) {
                     onPointerOver={(e) => e.stopPropagation()}
                     onPointerOut={(e) => e.stopPropagation()}
                   >
-                    {/* Subtle glow effect behind image */}
+                    {/* Golden-pink glow behind image */}
                     <mesh raycast={() => null} position={[0, 0, -0.01]}>
-                      <planeGeometry args={[0.25, 0.25]} />
+                      <planeGeometry args={[0.28, 0.28]} />
                       <meshStandardMaterial
-                        color="#EC4899"
-                        emissive="#EC4899"
+                        color="#FBBF24"
+                        emissive="#F9A8D4"
                         emissiveIntensity={0.5}
                         transparent
-                        opacity={0.15}
+                        opacity={0.2}
                         side={2}
                       />
                     </mesh>
@@ -328,35 +313,30 @@ export default function PlanetScene({ onEnterWorld }: PlanetSceneProps) {
       })()}
       
 
-      {/* Rocket - Decorative only */}
-      <group
-        ref={rocketRef}
-        position={[0, 3, 0]}
-        raycast={() => null}
-      >
+      {/* Rocket — golden, magical */}
+      <group ref={rocketRef} position={[0, 3, 0]} raycast={() => null}>
         <mesh>
-          <coneGeometry args={[0.3, 1, 8]} />
+          <coneGeometry args={[0.32, 1, 8]} />
           <meshStandardMaterial
-            color="#FFD700"
-            emissive="#FFD700"
-            emissiveIntensity={0.5}
+            color="#FCD34D"
+            emissive="#FBBF24"
+            emissiveIntensity={0.7}
           />
         </mesh>
         <mesh position={[0, -0.5, 0]}>
-          <boxGeometry args={[0.4, 0.3, 0.4]} />
+          <boxGeometry args={[0.42, 0.32, 0.42]} />
           <meshStandardMaterial
-            color="#FF6B6B"
-            emissive="#FF6B6B"
-            emissiveIntensity={0.3}
+            color="#F9A8D4"
+            emissive="#EC4899"
+            emissiveIntensity={0.4}
           />
         </mesh>
-        {/* Rocket trail particles */}
         {[...Array(5)].map((_, i) => (
-          <mesh key={i} position={[0, -0.8 - i * 0.1, 0]}>
-            <sphereGeometry args={[0.05, 8, 8]} />
+          <mesh key={i} position={[0, -0.8 - i * 0.12, 0]}>
+            <sphereGeometry args={[0.06, 8, 8]} />
             <meshStandardMaterial
-              color="#FFD700"
-              emissive="#FFD700"
+              color="#FDE68A"
+              emissive="#FBBF24"
               emissiveIntensity={1}
             />
           </mesh>

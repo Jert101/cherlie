@@ -1,7 +1,8 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Poppins, Dancing_Script } from 'next/font/google'
 import './globals.css'
 import AmbientSound from '@/components/AmbientSound'
+import InactivityLogout from '@/components/InactivityLogout'
 
 const poppins = Poppins({
   weight: ['300', '400', '500', '600', '700'],
@@ -16,8 +17,26 @@ const dancingScript = Dancing_Script({
 })
 
 export const metadata: Metadata = {
-  title: 'Our World',
+  title: 'SoLuna',
   description: 'A romantic, interactive world for us',
+  applicationName: 'SoLuna',
+  icons: { icon: '/SoLuna.jpg', apple: '/SoLuna.jpg' },
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'SoLuna',
+  },
+  formatDetection: {
+    telephone: false,
+    email: false,
+  },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#1a0f1a',
+  width: 'device-width',
+  initialScale: 1,
 }
 
 export default function RootLayout({
@@ -30,6 +49,7 @@ export default function RootLayout({
       <body className={`${poppins.variable} ${dancingScript.variable} font-sans antialiased`}>
         {children}
         <AmbientSound />
+        <InactivityLogout />
       </body>
     </html>
   )

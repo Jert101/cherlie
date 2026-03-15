@@ -4,7 +4,9 @@ type Panel =
   | 'dashboard'
   | 'memories'
   | 'letters'
+  | 'poems'
   | 'surprises'
+  | 'wishes'
   | 'games'
   | 'daily-messages'
   | 'settings'
@@ -19,7 +21,9 @@ export default function AdminNav({ activePanel, onPanelChange }: AdminNavProps) 
     { id: 'dashboard', label: 'Dashboard', icon: '🎛️' },
     { id: 'memories', label: 'Memories', icon: '🌺' },
     { id: 'letters', label: 'Letters', icon: '💌' },
+    { id: 'poems', label: 'River of Poem', icon: '🌊' },
     { id: 'surprises', label: 'Surprises', icon: '⭐' },
+    { id: 'wishes', label: 'Star Hill wishes', icon: '🙏' },
     { id: 'games', label: 'Games', icon: '🎮' },
     { id: 'daily-messages', label: 'Daily Messages', icon: '📅' },
     { id: 'settings', label: 'Settings', icon: '⚙️' },

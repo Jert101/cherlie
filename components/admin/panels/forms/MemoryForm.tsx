@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { supabase, Memory } from '@/lib/supabase'
 import { uploadImageToSupabase, compressImage } from '@/lib/imageUtils'
+import { getTodayDateStringInPH } from '@/lib/dateUtils'
 
 interface MemoryFormProps {
   memory: Memory | null
@@ -15,7 +16,7 @@ export default function MemoryForm({ memory, onClose, onSave }: MemoryFormProps)
     title: memory?.title || '',
     description: memory?.description || '',
     image_url: memory?.image_url || '',
-    date: memory?.date || new Date().toISOString().split('T')[0],
+    date: memory?.date || getTodayDateStringInPH(),
     location: memory?.location || '',
     visible: memory?.visible ?? true,
   })

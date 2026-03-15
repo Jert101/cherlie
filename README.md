@@ -1,4 +1,4 @@
-# Our World - Interactive Romantic Website
+# SoLuna - Interactive Romantic Website
 
 A beautiful, interactive website dedicated to a special relationship, featuring memories, love letters, games, surprises, and a romantic confession experience.
 
