@@ -5,8 +5,8 @@ export function extractYouTubeId(url: string): string | null {
   if (!url) return null
   
   const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
-    /youtube\.com\/watch\?.*v=([^&\n?#]+)/,
+    /(?:youtube\.com\/watch\?v=|music\.youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+    /(?:youtube\.com|music\.youtube\.com)\/watch\?.*v=([^&\n?#]+)/,
   ]
   
   for (const pattern of patterns) {
@@ -33,5 +33,12 @@ export function getYouTubeEmbedUrl(url: string): string | null {
  * Check if URL is a YouTube URL
  */
 export function isYouTubeUrl(url: string): boolean {
-  return /youtube\.com|youtu\.be/.test(url)
+  return /(?:music\.)?youtube\.com|youtu\.be/.test(url ?? '')
+}
+
+/**
+ * Embed URL for playback with controls (no autoplay) — e.g. for surprise audio
+ */
+export function getYouTubeEmbedUrlWithControls(videoId: string): string {
+  return `https://www.youtube.com/embed/${videoId}?controls=1&modestbranding=1&rel=0`
 }

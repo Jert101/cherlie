@@ -123,3 +123,47 @@ html {
     transform: translateY(-40px);
   }
 }
+
+/* Romantic map frame */
+.map-frame {
+  background: linear-gradient(145deg, rgba(88, 28, 135, 0.35) 0%, rgba(126, 34, 206, 0.25) 40%, rgba(79, 70, 229, 0.3) 100%);
+  box-shadow:
+    inset 0 0 60px rgba(236, 72, 153, 0.06),
+    0 0 0 1px rgba(251, 113, 133, 0.2),
+    0 0 40px rgba(139, 92, 246, 0.15),
+    0 25px 50px -12px rgba(0, 0, 0, 0.4);
+}
+
+.map-pin-glow {
+  box-shadow:
+    0 0 12px rgba(236, 72, 153, 0.6),
+    0 0 24px rgba(236, 72, 153, 0.35),
+    0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.map-pin-glow:hover {
+  box-shadow:
+    0 0 20px rgba(236, 72, 153, 0.8),
+    0 0 40px rgba(236, 72, 153, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Journey path (mobile) */
+.journey-path-line {
+  stroke-dasharray: 4 6;
+  animation: path-dash 20s linear infinite;
+}
+
+@keyframes path-dash {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+/* Constellation star twinkle */
+.constellation-star {
+  filter: drop-shadow(0 0 6px rgba(251, 113, 133, 0.8));
+}
+.constellation-star:hover {
+  filter: drop-shadow(0 0 14px rgba(251, 113, 133, 1));
+}

@@ -72,3 +72,41 @@ export async function uploadImageToSupabase(
 
   return publicUrl
 }
+
+/**
+ * Upload a file to Supabase Storage without compression (for audio, or any file)
+ * @param file - The file to upload
+ * @param bucket - Storage bucket name
+ * @param folder - Folder path inside the bucket
+ * @returns Public URL of the uploaded file
+ */
+export async function uploadFileToSupabase(
+  file: File,
+  bucket: string = 'memories',
+  folder: string = 'surprises'
+): Promise<string> {
+  const { createClient } = await import('@supabase/supabase-js')
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Supabase credentials not configured')
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseAnonKey)
+  const ext = file.name.split('.').pop() || 'bin'
+  const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${ext}`
+
+  const { data, error } = await supabase.storage.from(bucket).upload(fileName, file, {
+    cacheControl: '3600',
+    upsert: false,
+  })
+
+  if (error) {
+    console.error('Error uploading file:', error)
+    throw new Error(`Failed to upload: ${error.message}`)
+  }
+
+  const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(data.path)
+  return publicUrl
+}

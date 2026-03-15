@@ -93,60 +93,68 @@ export default function HeartCatcher() {
 
   if (gameWon) {
     return (
-      <div className="success-modal text-center p-8">
-        <div className="text-6xl mb-4 animate-bounce">💕</div>
-        <h3 className="text-3xl font-bold text-handwritten text-pink-300 mb-4">
-          Amazing!
+      <div className="success-modal text-center p-8 rounded-2xl bg-gradient-to-b from-purple-900/60 to-pink-900/40 border border-pink-500/30 shadow-[0_0_40px_rgba(236,72,153,0.2)]">
+        <div className="flex justify-center gap-2 mb-4 flex-wrap">
+          {['💖', '💕', '✨', '💖', '💕'].map((e, i) => (
+            <span key={i} className="text-4xl md:text-5xl animate-bounce" style={{ animationDelay: `${i * 0.08}s` }}>{e}</span>
+          ))}
+        </div>
+        <h3 className="text-2xl md:text-3xl font-bold text-handwritten text-pink-300 mb-2">
+          You caught my heart!
         </h3>
-        <p className="text-purple-200 text-lg mb-6">{successMessage}</p>
+        <p className="text-purple-200 text-sm md:text-base mb-6 max-w-md mx-auto">{successMessage}</p>
         <button
           onClick={startGame}
-          className="px-6 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-300"
+          className="px-6 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-pink-500/30"
         >
-          Play Again
+          Catch hearts again
         </button>
       </div>
     )
   }
 
   return (
-    <div className="p-4">
-      <div className="mb-4 flex justify-between items-center">
-        <div>
-          <p className="text-purple-200">Score: {score}</p>
-          <p className="text-purple-200">Time: {timeLeft}s</p>
+    <div className="p-2 md:p-4 space-y-4">
+      <p className="text-center text-sm text-pink-200/80 text-handwritten">
+        Hearts are falling from the sky. Tap them before they disappear — catch 20 to win!
+      </p>
+      <div className="flex justify-between items-center flex-wrap gap-2">
+        <div className="flex gap-4">
+          <p className="text-purple-200 text-sm">Hearts: <span className="text-pink-300 font-semibold">{score}/20</span></p>
+          <p className="text-purple-200 text-sm">Time: <span className="text-pink-300 font-semibold">{timeLeft}s</span></p>
         </div>
         {!gameActive && (
           <button
             onClick={startGame}
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-300"
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-300 shadow-lg text-sm"
           >
-            Start Game
+            Start — hearts will fall!
           </button>
         )}
       </div>
 
       <div
         ref={gameAreaRef}
-        className="relative w-full h-96 bg-purple-900/30 rounded-xl border-2 border-purple-500/30 overflow-hidden"
+        className="relative w-full h-80 md:h-96 rounded-2xl overflow-hidden border-2 border-pink-500/30 shadow-inner"
+        style={{ background: 'linear-gradient(180deg, rgba(88,28,135,0.4) 0%, rgba(126,34,206,0.3) 50%, rgba(236,72,153,0.2) 100%)' }}
       >
         {hearts.map((heart) => (
           <button
             key={heart.id}
             onClick={() => catchHeart(heart.id)}
-            className="absolute text-4xl animate-bounce cursor-pointer hover:scale-125 transition-transform"
+            className="absolute text-4xl md:text-5xl cursor-pointer hover:scale-125 active:scale-95 transition-transform drop-shadow-lg"
             style={{
               left: `${heart.x}%`,
               top: `${heart.y}%`,
+              transform: 'translate(-50%, -50%)',
             }}
           >
             💖
           </button>
         ))}
-        
         {!gameActive && hearts.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center text-purple-300">
-            <p className="text-xl">Click "Start Game" to begin catching hearts!</p>
+          <div className="absolute inset-0 flex items-center justify-center text-pink-200/90 px-4">
+            <p className="text-center text-base md:text-lg text-handwritten">When you start, hearts will rain down. Tap each one — my heart is in every tap.</p>
           </div>
         )}
       </div>

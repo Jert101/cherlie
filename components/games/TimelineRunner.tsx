@@ -91,67 +91,72 @@ export default function TimelineRunner() {
 
   if (gameWon) {
     return (
-      <div className="success-modal text-center p-8">
-        <div className="text-6xl mb-4 animate-bounce">🌟</div>
-        <h3 className="text-3xl font-bold text-handwritten text-pink-300 mb-4">
-          You Did It!
+      <div className="success-modal text-center p-8 rounded-2xl bg-gradient-to-b from-purple-900/60 to-pink-900/40 border border-pink-500/30 shadow-[0_0_40px_rgba(236,72,153,0.2)]">
+        <div className="flex justify-center gap-2 mb-4">
+          {['💕', '🌟', '💖'].map((e, i) => (
+            <span key={i} className="text-5xl animate-bounce" style={{ animationDelay: `${i * 0.1}s` }}>{e}</span>
+          ))}
+        </div>
+        <h3 className="text-2xl md:text-3xl font-bold text-handwritten text-pink-300 mb-2">
+          You reached the end of our timeline!
         </h3>
-        <p className="text-purple-200 text-lg mb-6">{successMessage}</p>
+        <p className="text-purple-200 text-sm md:text-base mb-6 max-w-md mx-auto">{successMessage}</p>
         <button
           onClick={startGame}
-          className="px-6 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-300"
+          className="px-6 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-pink-500/30"
         >
-          Play Again
+          Run to me again
         </button>
       </div>
     )
   }
 
   return (
-    <div className="p-4" onKeyDown={handleKeyPress} tabIndex={0}>
-      <div className="mb-4 flex justify-between items-center">
-        <div>
-          <p className="text-purple-200">Distance: {distance}/100</p>
-          <p className="text-purple-200 text-sm">Use ← → arrows to move</p>
+    <div className="p-2 md:p-4 space-y-4" onKeyDown={handleKeyPress} tabIndex={0}>
+      <p className="text-center text-sm text-pink-200/80 text-handwritten">
+        You&apos;re running toward me. Use ← → to dodge the clouds and reach 100!
+      </p>
+      <div className="flex justify-between items-center flex-wrap gap-2">
+        <div className="flex gap-4">
+          <p className="text-purple-200 text-sm">Distance: <span className="text-pink-300 font-semibold">{distance}/100</span></p>
+          <p className="text-purple-200 text-sm">Use ← → to move</p>
         </div>
         {!gameActive && (
           <button
             onClick={startGame}
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-300"
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-300 shadow-lg text-sm"
           >
-            Start Game
+            Start — run to me!
           </button>
         )}
       </div>
 
-      <div className="relative w-full h-96 bg-purple-900/30 rounded-xl border-2 border-purple-500/30 overflow-hidden">
-        {/* Lanes */}
+      <div
+        className="relative w-full h-80 md:h-96 rounded-2xl overflow-hidden border-2 border-pink-500/30"
+        style={{ background: 'linear-gradient(180deg, rgba(30,27,75,0.6) 0%, rgba(88,28,135,0.3) 100%)' }}
+      >
         <div className="absolute inset-0 flex">
           {[0, 1, 2].map((lane) => (
             <div
               key={lane}
-              className="flex-1 border-r border-purple-500/20 last:border-r-0 relative"
+              className="flex-1 border-r border-pink-500/20 last:border-r-0 relative"
             >
-              {/* Player */}
               {position === lane && (
-                <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 text-5xl animate-bounce">
-                  🏃
+                <div className="absolute bottom-12 left-1/2 -translate-x-1/2 text-5xl md:text-6xl animate-bounce drop-shadow-lg">
+                  💕
                 </div>
               )}
-              
-              {/* Obstacles */}
               {obstacles.includes(lane) && (
-                <div className="absolute top-10 left-1/2 transform -translate-x-1/2 text-4xl animate-pulse">
-                  ⚠️
+                <div className="absolute top-8 left-1/2 -translate-x-1/2 text-3xl md:text-4xl opacity-80">
+                  ☁️
                 </div>
               )}
             </div>
           ))}
         </div>
-        
         {!gameActive && distance === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center text-purple-300">
-            <p className="text-xl">Click "Start Game" and use arrow keys to run!</p>
+          <div className="absolute inset-0 flex items-center justify-center text-pink-200/90 px-4">
+            <p className="text-center text-base md:text-lg text-handwritten">Press Start, then use the arrow keys to move. Run through the clouds to reach me.</p>
           </div>
         )}
       </div>
