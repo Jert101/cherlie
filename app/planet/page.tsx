@@ -8,6 +8,7 @@ import { Suspense } from 'react'
 import PlanetScene from '@/components/PlanetScene'
 import ParticleField from '@/components/ParticleField'
 import ResponsivePlanetCamera from '@/components/ResponsivePlanetCamera'
+import TimeLockGuard from '@/components/TimeLockGuard'
 import { createSpeedOfLightAnimation } from '@/lib/speedOfLightAnimation'
 
 export default function PlanetPage() {
@@ -39,16 +40,19 @@ export default function PlanetPage() {
 
   if (!mounted) {
     return (
-      <div className="flex items-center justify-center min-h-screen cosmic-gradient">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-400/80 mx-auto mb-4" />
-          <p className="text-pink-200 text-lg text-handwritten">Bringing you to our world…</p>
+      <TimeLockGuard>
+        <div className="flex items-center justify-center min-h-screen cosmic-gradient">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-400/80 mx-auto mb-4" />
+            <p className="text-pink-200 text-lg text-handwritten">Bringing you to our world…</p>
+          </div>
         </div>
-      </div>
+      </TimeLockGuard>
     )
   }
 
   return (
+    <TimeLockGuard>
     <div className="relative min-h-[100dvh] h-[100dvh] w-full cosmic-gradient overflow-hidden">
       <ParticleField />
 
@@ -137,5 +141,6 @@ export default function PlanetPage() {
         </p>
       </div>
     </div>
+    </TimeLockGuard>
   )
 }

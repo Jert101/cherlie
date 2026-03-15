@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { gsap } from 'gsap'
 import { supabase, SiteSettings } from '@/lib/supabase'
 import ParticleField from '@/components/ParticleField'
+import TimeLockGuard from '@/components/TimeLockGuard'
 import { createSpeedOfLightAnimation } from '@/lib/speedOfLightAnimation'
 
 const WELCOME_STATS_ID = 'gf_welcome'
@@ -152,16 +153,19 @@ export default function WelcomePage() {
 
   if (!mounted || !copyReady) {
     return (
-      <div className="relative min-h-screen cosmic-gradient flex items-center justify-center">
-        <ParticleField />
-        <p className="relative z-10 text-pink-300/80 text-handwritten text-lg">Opening our world…</p>
-      </div>
+      <TimeLockGuard>
+        <div className="relative min-h-screen cosmic-gradient flex items-center justify-center">
+          <ParticleField />
+          <p className="relative z-10 text-pink-300/80 text-handwritten text-lg">Opening our world…</p>
+        </div>
+      </TimeLockGuard>
     )
   }
 
   const { headline, subtext, badge } = getWelcomeCopy(welcomeVisitCount, settings?.gf_name ?? '')
 
   return (
+    <TimeLockGuard>
     <div className="relative min-h-screen cosmic-gradient flex items-center justify-center overflow-hidden">
       <ParticleField />
       <button
@@ -200,5 +204,6 @@ export default function WelcomePage() {
         </div>
       </div>
     </div>
+    </TimeLockGuard>
   )
 }

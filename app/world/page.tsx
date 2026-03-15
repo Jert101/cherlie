@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import WorldMap from '@/components/WorldMap'
 import ParticleField from '@/components/ParticleField'
+import TimeLockGuard from '@/components/TimeLockGuard'
 import { supabase } from '@/lib/supabase'
 
 export default function WorldPage() {
@@ -72,16 +73,19 @@ export default function WorldPage() {
 
   if (!mounted || visitCount === null) {
     return (
-      <div className="flex items-center justify-center min-h-screen cosmic-gradient">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500 mx-auto mb-4"></div>
-          <p className="text-pink-300 text-lg">Entering our world...</p>
+      <TimeLockGuard>
+        <div className="flex items-center justify-center min-h-screen cosmic-gradient">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500 mx-auto mb-4"></div>
+            <p className="text-pink-300 text-lg">Entering our world...</p>
+          </div>
         </div>
-      </div>
+      </TimeLockGuard>
     )
   }
 
   return (
+    <TimeLockGuard>
     <div className="relative min-h-screen cosmic-gradient overflow-x-hidden">
       <div className="hidden sm:block">
         <ParticleField />
@@ -98,5 +102,6 @@ export default function WorldPage() {
         <WorldMap visitCount={visitCount} />
       </div>
     </div>
+    </TimeLockGuard>
   )
 }

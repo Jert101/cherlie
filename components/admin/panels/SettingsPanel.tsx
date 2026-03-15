@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { supabase, SiteSettings, VisitStats } from '@/lib/supabase'
 import { unlockDateToPartsPH, partsPHToUnlockDateISO, getTodayDateStringInPH } from '@/lib/dateUtils'
 
 export default function SettingsPanel() {
+  const router = useRouter()
   const [settings, setSettings] = useState<SiteSettings | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -60,6 +62,11 @@ export default function SettingsPanel() {
         throw error
       }
       alert('Settings saved successfully!')
+      if (settings.time_lock_enabled) {
+        localStorage.removeItem('userRole')
+        if (typeof sessionStorage !== 'undefined') sessionStorage.removeItem('welcomeFromCodeEntry')
+        router.replace('/')
+      }
     } catch (err: any) {
       console.error('Error saving settings:', err)
       const errorMessage = err?.message || err?.error?.message || 'Unknown error occurred'
