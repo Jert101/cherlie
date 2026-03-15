@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase, SiteSettings, VisitStats } from '@/lib/supabase'
+import { unlockDateToPartsPH, partsPHToUnlockDateISO, getTodayDateStringInPH } from '@/lib/dateUtils'
 
 export default function SettingsPanel() {
   const [settings, setSettings] = useState<SiteSettings | null>(null)
@@ -219,17 +220,60 @@ export default function SettingsPanel() {
           </label>
         </div>
 
-        {settings.time_lock_enabled && (
-          <div>
-            <label className="block text-purple-200 mb-2">Unlock Date & Time</label>
-            <input
-              type="datetime-local"
-              value={settings.unlock_date ? new Date(settings.unlock_date).toISOString().slice(0, 16) : ''}
-              onChange={(e) => setSettings({ ...settings, unlock_date: e.target.value ? new Date(e.target.value).toISOString() : null })}
-              className="w-full px-4 py-2 rounded-lg bg-purple-800/50 border border-purple-500/50 text-white focus:outline-none focus:border-pink-500"
-            />
-          </div>
-        )}
+        {settings.time_lock_enabled && (() => {
+            const parts = unlockDateToPartsPH(settings.unlock_date)
+            const date = parts?.date ?? getTodayDateStringInPH()
+            const hour = parts?.hour ?? 12
+            const minute = parts?.minute ?? 0
+            const ampm = parts?.ampm ?? 'PM'
+            const updateUnlock = (next: { date?: string; hour?: number; minute?: number; ampm?: 'AM' | 'PM' }) => {
+              const p = { date: next.date ?? date, hour: next.hour ?? hour, minute: next.minute ?? minute, ampm: next.ampm ?? ampm }
+              setSettings({ ...settings, unlock_date: partsPHToUnlockDateISO(p) })
+            }
+            return (
+              <div>
+                <label className="block text-purple-200 mb-2">Unlock Date & Time (Philippine time, 12-hour)</label>
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    type="date"
+                    value={date}
+                    onChange={(e) => updateUnlock({ date: e.target.value })}
+                    className="px-4 py-2 rounded-lg bg-purple-800/50 border border-purple-500/50 text-white focus:outline-none focus:border-pink-500"
+                  />
+                  <select
+                    value={hour}
+                    onChange={(e) => updateUnlock({ hour: parseInt(e.target.value, 10) })}
+                    className="px-3 py-2 rounded-lg bg-purple-800/50 border border-purple-500/50 text-white focus:outline-none focus:border-pink-500"
+                  >
+                    {[1,2,3,4,5,6,7,8,9,10,11,12].map((h) => (
+                      <option key={h} value={h}>{h}</option>
+                    ))}
+                  </select>
+                  <span className="text-purple-300">:</span>
+                  <select
+                    value={minute}
+                    onChange={(e) => updateUnlock({ minute: parseInt(e.target.value, 10) })}
+                    className="px-3 py-2 rounded-lg bg-purple-800/50 border border-purple-500/50 text-white focus:outline-none focus:border-pink-500"
+                  >
+                    {Array.from({ length: 60 }, (_, i) => i).map((m) => (
+                      <option key={m} value={m}>{String(m).padStart(2, '0')}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={ampm}
+                    onChange={(e) => updateUnlock({ ampm: e.target.value as 'AM' | 'PM' })}
+                    className="px-3 py-2 rounded-lg bg-purple-800/50 border border-purple-500/50 text-white focus:outline-none focus:border-pink-500"
+                  >
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
+                <p className="text-xs text-purple-300 mt-1">
+                  Set the moment the world unlocks (Asia/Manila, 12-hour).
+                </p>
+              </div>
+            )
+          })()}
 
         <div>
           <label className="block text-purple-200 mb-2">Music URL (optional)</label>
