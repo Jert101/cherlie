@@ -3,6 +3,7 @@ import { Poppins, Dancing_Script } from 'next/font/google'
 import './globals.css'
 import AmbientSound from '@/components/AmbientSound'
 import InactivityLogout from '@/components/InactivityLogout'
+import PWAInstallPrompt from '@/components/PWAInstallPrompt'
 
 const poppins = Poppins({
   weight: ['300', '400', '500', '600', '700'],
@@ -50,6 +51,7 @@ export default function RootLayout({
         {children}
         <AmbientSound />
         <InactivityLogout />
+        <PWAInstallPrompt />
       </body>
     </html>
   )

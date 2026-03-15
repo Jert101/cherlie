@@ -7,6 +7,7 @@ import { OrbitControls, Stars } from '@react-three/drei'
 import { Suspense } from 'react'
 import PlanetScene from '@/components/PlanetScene'
 import ParticleField from '@/components/ParticleField'
+import ResponsivePlanetCamera from '@/components/ResponsivePlanetCamera'
 import { createSpeedOfLightAnimation } from '@/lib/speedOfLightAnimation'
 
 export default function PlanetPage() {
@@ -48,7 +49,7 @@ export default function PlanetPage() {
   }
 
   return (
-    <div className="relative min-h-screen cosmic-gradient overflow-hidden">
+    <div className="relative min-h-[100dvh] h-[100dvh] w-full cosmic-gradient overflow-hidden">
       <ParticleField />
 
       {/* Golden romantic overlay — subtle vignette and warm gradient */}
@@ -82,8 +83,13 @@ export default function PlanetPage() {
         </p>
       </div>
 
-      <div className="absolute inset-0 z-10">
-        <Canvas camera={{ position: [0, 0, 10], fov: 75 }}>
+      <div className="absolute inset-0 z-10 w-full h-full min-h-0">
+        <Canvas
+          camera={{ position: [0, 0, 10], fov: 75 }}
+          gl={{ alpha: true, antialias: true }}
+          style={{ display: 'block', width: '100%', height: '100%' }}
+        >
+          <ResponsivePlanetCamera />
           <Suspense fallback={null}>
             <ambientLight intensity={0.55} />
             <directionalLight position={[10, 10, 5]} intensity={1.4} color="#FFF8E7" />
@@ -109,12 +115,12 @@ export default function PlanetPage() {
             <OrbitControls
               enableZoom={true}
               enablePan={false}
-              minDistance={5}
-              maxDistance={50}
+              minDistance={4}
+              maxDistance={55}
               autoRotate={false}
               enableDamping={true}
               dampingFactor={0.05}
-              zoomSpeed={1.5}
+              zoomSpeed={1.2}
               rotateSpeed={0.5}
             />
           </Suspense>

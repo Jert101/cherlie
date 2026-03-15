@@ -13,12 +13,16 @@ interface PlanetSceneProps {
 }
 
 export default function PlanetScene({ onEnterWorld }: PlanetSceneProps) {
+  const { size } = useThree()
   const planetRef = useRef<Group>(null)
   const rocketRef = useRef<Group>(null)
   const ringsRef = useRef<(Group | null)[]>([])
   const [settings, setSettings] = useState<SiteSettings | null>(null)
   const [memories, setMemories] = useState<Memory[]>([])
   const [hovered, setHovered] = useState(false)
+
+  const isNarrow = size.width < 768
+  const isSmall = size.width < 480
 
   const memoryStarPositions = useMemo(() => {
     if (!memories.length) return [] as [number, number, number][]
@@ -206,10 +210,11 @@ export default function PlanetScene({ onEnterWorld }: PlanetSceneProps) {
 
       {/* Rotating Ring of Memory Images - asteroid-like, always facing camera */}
       {memories.length > 0 && (() => {
-        // Create a ring with all memories, multiplied to fill it completely
-        const imagesPerRing = 100 // Increased number of images to show in the ring
-        const baseRadius = 6.5 // Widened ring to prevent photos from touching
-        const baseY = 0 // Keep flat horizontal plane
+        const imagesPerRing = isSmall ? 40 : isNarrow ? 60 : 100
+        const baseRadius = isSmall ? 5.5 : isNarrow ? 6 : 6.5
+        const baseY = 0
+        const imageScale = isSmall ? 0.14 : isNarrow ? 0.17 : 0.2
+        const glowSize = imageScale * 1.4
         
         // Duplicate memories to fill the ring if we have fewer memories than imagesPerRing
         const duplicatedMemories: (Memory & { duplicateIndex?: number })[] = []
@@ -285,7 +290,7 @@ export default function PlanetScene({ onEnterWorld }: PlanetSceneProps) {
                   >
                     {/* Golden-pink glow behind image */}
                     <mesh raycast={() => null} position={[0, 0, -0.01]}>
-                      <planeGeometry args={[0.28, 0.28]} />
+                      <planeGeometry args={[glowSize, glowSize]} />
                       <meshStandardMaterial
                         color="#FBBF24"
                         emissive="#F9A8D4"
@@ -296,10 +301,10 @@ export default function PlanetScene({ onEnterWorld }: PlanetSceneProps) {
                       />
                     </mesh>
                     
-                    {/* Memory Image - always faces camera, much smaller size */}
+                    {/* Memory Image - always faces camera, responsive size */}
                     <Image
                       url={memory.image_url}
-                      scale={[0.2, 0.2]}
+                      scale={[imageScale, imageScale]}
                       position={[0, 0, 0]}
                       transparent
                       raycast={() => null}
