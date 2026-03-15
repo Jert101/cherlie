@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { supabase, Poem } from '@/lib/supabase'
+import { getTodayDateStringInPH } from '@/lib/dateUtils'
 
 interface PoemFormProps {
   poem: Poem | null
@@ -13,6 +14,7 @@ export default function PoemForm({ poem, onClose, onSave }: PoemFormProps) {
   const [formData, setFormData] = useState({
     title: poem?.title || '',
     body: poem?.body || '',
+    date: poem?.date || getTodayDateStringInPH(),
     order_index: poem?.order_index ?? 0,
     visible: poem?.visible ?? true,
   })
@@ -64,6 +66,16 @@ export default function PoemForm({ poem, onClose, onSave }: PoemFormProps) {
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               required
               placeholder="e.g. For You, On a Quiet Night"
+              className="w-full px-4 py-2 rounded-lg bg-purple-800/50 border border-purple-500/50 text-white focus:outline-none focus:border-pink-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-purple-200 mb-2">Date</label>
+            <input
+              type="date"
+              value={formData.date}
+              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
               className="w-full px-4 py-2 rounded-lg bg-purple-800/50 border border-purple-500/50 text-white focus:outline-none focus:border-pink-500"
             />
           </div>

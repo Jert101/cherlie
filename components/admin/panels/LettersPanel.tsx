@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { supabase, Letter } from '@/lib/supabase'
 import LetterForm from './forms/LetterForm'
+import { formatDateInPH } from '@/lib/dateUtils'
 
 export default function LettersPanel() {
   const [letters, setLetters] = useState<Letter[]>([])
@@ -130,6 +131,9 @@ export default function LettersPanel() {
                 <div className="flex items-center gap-3 mb-2">
                   <span className="text-purple-300 text-sm">#{letter.order_index}</span>
                   <h3 className="font-bold text-pink-300 text-xl">{letter.title}</h3>
+                  {letter.date && (
+                    <span className="text-purple-400 text-sm">{formatDateInPH(letter.date)}</span>
+                  )}
                   {!letter.visible && (
                     <span className="text-red-300 text-sm font-bold">(Hidden)</span>
                   )}

@@ -25,6 +25,7 @@ export interface Letter {
   id: string
   title: string
   content: string
+  date?: string | null
   order_index: number
   visible: boolean
   created_at?: string
@@ -34,6 +35,7 @@ export interface Poem {
   id: string
   title: string
   body: string
+  date?: string | null
   order_index: number
   visible: boolean
   created_at?: string

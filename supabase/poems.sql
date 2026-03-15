@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS poems (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title VARCHAR(255) NOT NULL,
   body TEXT NOT NULL,
+  date DATE,
   order_index INTEGER DEFAULT 0,
   visible BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

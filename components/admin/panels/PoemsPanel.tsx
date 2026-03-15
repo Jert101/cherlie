@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { supabase, Poem } from '@/lib/supabase'
 import PoemForm from './forms/PoemForm'
+import { formatDateInPH } from '@/lib/dateUtils'
 
 export default function PoemsPanel() {
   const [poems, setPoems] = useState<Poem[]>([])
@@ -130,6 +131,9 @@ export default function PoemsPanel() {
                 <div className="flex items-center gap-3 mb-2">
                   <span className="text-purple-300 text-sm">#{poem.order_index}</span>
                   <h3 className="font-bold text-pink-300 text-xl">{poem.title}</h3>
+                  {poem.date && (
+                    <span className="text-purple-400 text-sm">{formatDateInPH(poem.date)}</span>
+                  )}
                   {!poem.visible && (
                     <span className="text-red-300 text-sm font-bold">(Hidden)</span>
                   )}

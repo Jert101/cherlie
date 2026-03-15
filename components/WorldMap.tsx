@@ -689,6 +689,11 @@ function LetterCard({ letter }: { letter: Letter }) {
               <p className="text-[10px] md:text-xs uppercase tracking-widest text-pink-300/70 mb-3 text-handwritten">
                 To the one I love,
               </p>
+              {letter.date && (
+                <p className="text-[10px] md:text-xs text-pink-300/60 mb-2 relative z-10">
+                  {formatDateInPH(letter.date)}
+                </p>
+              )}
               <p className="text-xs md:text-sm text-purple-100 whitespace-pre-wrap leading-relaxed relative z-10">
                 {letter.content}
               </p>
@@ -724,6 +729,9 @@ function PoemCard({ poem }: { poem: Poem }) {
             <h3 className="text-lg md:text-xl font-bold text-handwritten text-cyan-200">
               {poem.title}
             </h3>
+            {poem.date && (
+              <span className="text-xs text-cyan-200/70 ml-auto">{formatDateInPH(poem.date)}</span>
+            )}
           </div>
           <p className={`text-sm text-purple-100 whitespace-pre-wrap leading-relaxed ${expanded ? '' : 'line-clamp-4'}`}>
             {poem.body}

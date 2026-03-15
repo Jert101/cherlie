@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { supabase, Letter } from '@/lib/supabase'
+import { getTodayDateStringInPH } from '@/lib/dateUtils'
 
 interface LetterFormProps {
   letter: Letter | null
@@ -13,6 +14,7 @@ export default function LetterForm({ letter, onClose, onSave }: LetterFormProps)
   const [formData, setFormData] = useState({
     title: letter?.title || '',
     content: letter?.content || '',
+    date: letter?.date || getTodayDateStringInPH(),
     order_index: letter?.order_index || 0,
     visible: letter?.visible ?? true,
   })
@@ -63,6 +65,16 @@ export default function LetterForm({ letter, onClose, onSave }: LetterFormProps)
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               required
+              className="w-full px-4 py-2 rounded-lg bg-purple-800/50 border border-purple-500/50 text-white focus:outline-none focus:border-pink-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-purple-200 mb-2">Date</label>
+            <input
+              type="date"
+              value={formData.date}
+              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
               className="w-full px-4 py-2 rounded-lg bg-purple-800/50 border border-purple-500/50 text-white focus:outline-none focus:border-pink-500"
             />
           </div>
