@@ -65,6 +65,9 @@ export interface SiteSettings {
   gf_code: string
   admin_code: string
   bf_code?: string
+  special_star_enabled?: boolean
+  special_star_date?: string | null
+  special_star_message?: string | null
   time_lock_enabled: boolean
   unlock_date: string | null
   music_url: string | null
@@ -80,6 +83,14 @@ export interface Wish {
   visible: boolean
 }
 
+export interface Prayer {
+  id: string
+  message: string
+  author_role: 'gf' | 'bf' | string
+  created_at: string
+  visible: boolean
+}
+
 export interface DailyMessage {
   id: string
   message: string
@@ -91,5 +102,34 @@ export interface VisitStats {
   id: string
   visit_count: number
   last_visit: string
+}
+
+export interface ChatPortal {
+  id: string
+  closed_by_gf: boolean
+  closed_by_bf: boolean
+  delete_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ChatMessage {
+  id: string
+  portal_id: string
+  sender_role: 'gf' | 'bf'
+  message: string
+  is_unsent?: boolean
+  unsent_at?: string | null
+  unsent_by?: string | null
+  created_at: string
+}
+
+export interface ChatReaction {
+  id: string
+  portal_id: string
+  message_id: string
+  reactor_role: 'gf' | 'bf'
+  emoji: string
+  created_at: string
 }
 

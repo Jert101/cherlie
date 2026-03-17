@@ -7,6 +7,8 @@ type Panel =
   | 'poems'
   | 'surprises'
   | 'wishes'
+  | 'prayers'
+  | 'chat-portal'
   | 'games'
   | 'daily-messages'
   | 'settings'
@@ -24,6 +26,8 @@ export default function AdminNav({ activePanel, onPanelChange }: AdminNavProps) 
     { id: 'poems', label: 'River of Poem', icon: '🌊' },
     { id: 'surprises', label: 'Surprises', icon: '⭐' },
     { id: 'wishes', label: 'Star Hill wishes', icon: '🙏' },
+    { id: 'prayers', label: 'Prayer Wall', icon: '🕯️' },
+    { id: 'chat-portal', label: 'Portal Chat', icon: '🌀' },
     { id: 'games', label: 'Games', icon: '🎮' },
     { id: 'daily-messages', label: 'Daily Messages', icon: '📅' },
     { id: 'settings', label: 'Settings', icon: '⚙️' },

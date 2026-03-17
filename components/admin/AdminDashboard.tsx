@@ -8,6 +8,8 @@ import LettersPanel from './panels/LettersPanel'
 import PoemsPanel from './panels/PoemsPanel'
 import SurprisesPanel from './panels/SurprisesPanel'
 import WishesPanel from './panels/WishesPanel'
+import PrayersPanel from './panels/PrayersPanel'
+import ChatPortalPanel from './panels/ChatPortalPanel'
 import GamesPanel from './panels/GamesPanel'
 import SettingsPanel from './panels/SettingsPanel'
 import DailyMessagesPanel from './panels/DailyMessagesPanel'
@@ -19,6 +21,8 @@ type Panel =
   | 'poems'
   | 'surprises'
   | 'wishes'
+  | 'prayers'
+  | 'chat-portal'
   | 'games'
   | 'daily-messages'
   | 'settings'
@@ -76,6 +80,8 @@ export default function AdminDashboard() {
               {activePanel === 'poems' && <PoemsPanel />}
               {activePanel === 'surprises' && <SurprisesPanel />}
               {activePanel === 'wishes' && <WishesPanel />}
+              {activePanel === 'prayers' && <PrayersPanel />}
+              {activePanel === 'chat-portal' && <ChatPortalPanel />}
               {activePanel === 'games' && <GamesPanel />}
               {activePanel === 'daily-messages' && <DailyMessagesPanel />}
               {activePanel === 'settings' && <SettingsPanel />}

@@ -10,10 +10,14 @@ import ParticleField from '@/components/ParticleField'
 import ResponsivePlanetCamera from '@/components/ResponsivePlanetCamera'
 import TimeLockGuard from '@/components/TimeLockGuard'
 import { createSpeedOfLightAnimation } from '@/lib/speedOfLightAnimation'
+import { supabase, SiteSettings } from '@/lib/supabase'
+import { getTodayDateStringInPH } from '@/lib/dateUtils'
 
 export default function PlanetPage() {
   const [mounted, setMounted] = useState(false)
   const [animationComplete, setAnimationComplete] = useState(false)
+  const [settings, setSettings] = useState<SiteSettings | null>(null)
+  const [showStarMessage, setShowStarMessage] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -23,6 +27,15 @@ export default function PlanetPage() {
       router.push('/')
       return
     }
+
+    ;(async () => {
+      try {
+        const { data } = await supabase.from('site_settings').select('*').single()
+        if (data) setSettings(data)
+      } catch (e) {
+        console.error('Failed to load site settings:', e)
+      }
+    })()
 
     createSpeedOfLightAnimation(() => {
       setAnimationComplete(true)
@@ -114,7 +127,21 @@ export default function PlanetPage() {
               saturation={0.6}
             />
 
-            <PlanetScene onEnterWorld={handleEnterWorld} />
+            {(() => {
+              const role = typeof window !== 'undefined' ? localStorage.getItem('userRole') : null
+              const todayPH = getTodayDateStringInPH()
+              const enabled = !!settings?.special_star_enabled
+              const date = settings?.special_star_date || null
+              const hasMessage = (settings?.special_star_message || '').trim().length > 0
+              const showSpecialStar = enabled && hasMessage && date === todayPH && (role === 'gf' || role === 'bf')
+              return (
+                <PlanetScene
+                  onEnterWorld={handleEnterWorld}
+                  showSpecialStar={showSpecialStar}
+                  onSpecialStarClick={() => setShowStarMessage(true)}
+                />
+              )
+            })()}
 
             <OrbitControls
               enableZoom={true}
@@ -130,6 +157,49 @@ export default function PlanetPage() {
           </Suspense>
         </Canvas>
       </div>
+
+      {showStarMessage && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setShowStarMessage(false)}
+        >
+          <div
+            className="relative max-w-2xl w-full rounded-3xl border border-amber-300/30 bg-gradient-to-br from-slate-950/85 via-purple-950/70 to-pink-950/60 shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="absolute inset-0 opacity-60 pointer-events-none bg-[radial-gradient(circle_at_20%_20%,rgba(252,211,77,0.18),transparent_55%),radial-gradient(circle_at_80%_70%,rgba(236,72,153,0.10),transparent_60%)]" />
+            <div className="relative p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-[11px] uppercase tracking-widest text-amber-200/80">
+                    A star for a special day
+                  </p>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-handwritten text-amber-200 mt-1 drop-shadow">
+                    For you ✨
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setShowStarMessage(false)}
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-amber-100/80 hover:text-amber-100 hover:bg-white/10 transition-colors"
+                  aria-label="Close"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="mt-5 rounded-2xl border border-amber-300/20 bg-black/25 p-5">
+                <p className="text-purple-50/95 whitespace-pre-wrap leading-relaxed text-sm sm:text-base">
+                  {(settings?.special_star_message || '').trim()}
+                </p>
+              </div>
+
+              <p className="mt-5 text-xs text-purple-200/70 text-right italic">
+                Tap anywhere to return to the stars
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bottom hint — golden, romantic */}
       <div className="absolute bottom-6 sm:bottom-8 left-0 right-0 z-20 text-center px-4">

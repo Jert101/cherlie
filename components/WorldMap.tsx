@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { toPng } from 'html-to-image'
-import { supabase, Memory, Letter, Poem, Surprise, Wish, DailyMessage } from '@/lib/supabase'
+import { supabase, Memory, Letter, Poem, Surprise, Wish, Prayer, DailyMessage } from '@/lib/supabase'
 import { buildMemoryStarsFromMemories, type MemoryStarData } from '@/lib/starUtils'
-import { getDayIndexInPH, formatDateInPH } from '@/lib/dateUtils'
+import { getDayIndexInPH, formatDateInPH, getTodayDateStringInPH } from '@/lib/dateUtils'
 import { isYouTubeUrl, extractYouTubeId, getYouTubeEmbedUrlWithControls } from '@/lib/youtubeUtils'
 import WorldStarSky from './stars/WorldStarSky'
 import MemoryGarden from './locations/MemoryGarden'
@@ -19,8 +19,19 @@ import MemoryPuzzle from './games/MemoryPuzzle'
 import HeartCatcher from './games/HeartCatcher'
 import SayILoveYou from './games/SayILoveYou'
 import FinalCliffModal from './locations/FinalCliffModal'
+import PortalChat from './chat/PortalChat'
 
-type Location = 'memory-garden' | 'love-letter-house' | 'river-of-poem' | 'game-arcade' | 'star-hill' | 'final-cliff' | 'moon' | null
+type Location =
+  | 'memory-garden'
+  | 'love-letter-house'
+  | 'river-of-poem'
+  | 'game-arcade'
+  | 'star-hill'
+  | 'prayer-wall'
+  | 'chat-portal'
+  | 'final-cliff'
+  | 'moon'
+  | null
 
 interface WorldMapProps {
   visitCount: number
@@ -34,6 +45,9 @@ export default function WorldMap({ visitCount }: WorldMapProps) {
   const [surprises, setSurprises] = useState<Surprise[]>([])
   const [wishes, setWishes] = useState<Wish[]>([])
   const [isCreatingWish, setIsCreatingWish] = useState(false)
+  const [prayers, setPrayers] = useState<Prayer[]>([])
+  const [isCreatingPrayer, setIsCreatingPrayer] = useState(false)
+  const [isCreatingLetter, setIsCreatingLetter] = useState(false)
   const [dailyMessages, setDailyMessages] = useState<DailyMessage[]>([])
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null)
   const memoryCardRef = useRef<HTMLDivElement>(null)
@@ -122,6 +136,15 @@ export default function WorldMap({ visitCount }: WorldMapProps) {
         .order('order_index', { ascending: true })
 
       if (dailyData) setDailyMessages(dailyData)
+
+      // Load visible prayers (Prayer Wall)
+      const { data: prayerData } = await supabase
+        .from('prayers')
+        .select('*')
+        .eq('visible', true)
+        .order('created_at', { ascending: false })
+
+      if (prayerData) setPrayers(prayerData as Prayer[])
     } catch (err) {
       console.error('Error loading content:', err)
     }
@@ -176,6 +199,68 @@ export default function WorldMap({ visitCount }: WorldMapProps) {
       console.error('Error creating wish:', err)
     } finally {
       setIsCreatingWish(false)
+    }
+  }
+
+  const handleCreatePrayer = async (message: string) => {
+    const trimmed = message.trim()
+    if (!trimmed) return
+    const role = localStorage.getItem('userRole')
+    // Only GF and BF can add prayers.
+    // BF can be either the real admin account (`admin`) or the invisible tester (`bf`).
+    if (role !== 'gf' && role !== 'admin' && role !== 'bf') return
+    const authorRole = role === 'gf' ? 'gf' : 'bf'
+
+    try {
+      setIsCreatingPrayer(true)
+      const { data, error } = await supabase
+        .from('prayers')
+        .insert({ message: trimmed, author_role: authorRole, visible: true })
+        .select('*')
+        .single()
+
+      if (error) throw error
+      if (data) {
+        setPrayers((prev) => [data as Prayer, ...prev])
+      }
+    } catch (err) {
+      console.error('Error creating prayer:', err)
+    } finally {
+      setIsCreatingPrayer(false)
+    }
+  }
+
+  const handleCreateLetter = async (title: string, content: string) => {
+    const t = title.trim()
+    const c = content.trim()
+    if (!t || !c) return
+    const role = localStorage.getItem('userRole')
+    // Only GF can add letters here
+    if (role !== 'gf') return
+
+    try {
+      setIsCreatingLetter(true)
+      const nextOrder = Math.max(-1, ...letters.map((l) => l.order_index ?? 0)) + 1
+      const { data, error } = await supabase
+        .from('letters')
+        .insert({
+          title: t,
+          content: c,
+          date: getTodayDateStringInPH(),
+          order_index: nextOrder,
+          visible: true,
+        })
+        .select('*')
+        .single()
+
+      if (error) throw error
+      if (data) {
+        setLetters((prev) => [...prev, data as Letter])
+      }
+    } catch (err) {
+      console.error('Error creating letter:', err)
+    } finally {
+      setIsCreatingLetter(false)
     }
   }
 
@@ -269,6 +354,8 @@ export default function WorldMap({ visitCount }: WorldMapProps) {
               <MapPinSpot icon="🌊" label="River of Poem" subtitle={`${poems.length} poems`} onClick={() => handleLocationClick('river-of-poem')} />
               <MapPinSpot icon="🎮" label="Game Arcade" subtitle="Play together" onClick={() => handleLocationClick('game-arcade')} />
               <MapPinSpot icon="⭐" label="Star Hill" subtitle={`${surprises.length} surprises`} onClick={() => handleLocationClick('star-hill')} />
+              <MapPinSpot icon="🕯️" label="Prayer Wall" subtitle={`${prayers.length} prayers`} onClick={() => handleLocationClick('prayer-wall')} />
+              <MapPinSpot icon="🌀" label="Portal Chat" subtitle="Chit chat" onClick={() => handleLocationClick('chat-portal')} />
               <MapPinSpot icon="🌅" label="Final Cliff" subtitle="Where our story peaks" onClick={() => handleLocationClick('final-cliff')} />
               {visitCount >= 10 && (
                 <MapPinSpot icon="🌙" label="The Moon" subtitle="Secret place" onClick={() => handleLocationClick('moon')} />
@@ -300,6 +387,8 @@ export default function WorldMap({ visitCount }: WorldMapProps) {
               <MapPinSpot icon="🌊" label="River of Poem" subtitle={`${poems.length} poems`} onClick={() => handleLocationClick('river-of-poem')} className="constellation-star absolute left-1/2 top-[50%] -translate-x-1/2 -translate-y-1/2" />
               <MapPinSpot icon="⭐" label="Star Hill" subtitle={`${surprises.length} surprises`} onClick={() => handleLocationClick('star-hill')} className="constellation-star absolute left-[22%] bottom-[28%] -translate-x-1/2 translate-y-1/2" />
               <MapPinSpot icon="🌅" label="Final Cliff" subtitle="Where our story peaks" onClick={() => handleLocationClick('final-cliff')} className="constellation-star absolute right-[22%] bottom-[28%] translate-x-1/2 translate-y-1/2" />
+              <MapPinSpot icon="🕯️" label="Prayer Wall" subtitle={`${prayers.length} prayers`} onClick={() => handleLocationClick('prayer-wall')} className="constellation-star absolute left-1/2 top-[70%] -translate-x-1/2 -translate-y-1/2" />
+              <MapPinSpot icon="🌀" label="Portal Chat" subtitle="Chit chat" onClick={() => handleLocationClick('chat-portal')} className="constellation-star absolute left-1/2 bottom-[28%] -translate-x-1/2 translate-y-1/2" />
               {visitCount >= 10 && (
                 <MapPinSpot icon="🌙" label="The Moon" subtitle="Secret place" onClick={() => handleLocationClick('moon')} className="constellation-star absolute left-1/2 bottom-[10%] -translate-x-1/2 translate-y-1/2" />
               )}
@@ -459,6 +548,9 @@ export default function WorldMap({ visitCount }: WorldMapProps) {
                 </span>
               ))}
             </div>
+            <div className="relative z-10">
+              <LoveLetterWriteForm onCreate={handleCreateLetter} isSubmitting={isCreatingLetter} />
+            </div>
             {letters.length === 0 ? (
               <p className="text-center text-purple-200/80 text-sm py-8 text-handwritten">
                 No letters here yet — but every word I&apos;ll ever write is already yours.
@@ -573,6 +665,46 @@ export default function WorldMap({ visitCount }: WorldMapProps) {
                 )}
               </div>
             </div>
+          </div>
+        </LocationModal>
+      )}
+
+      {activeLocation === 'prayer-wall' && (
+        <LocationModal title="Prayer Wall" onClose={handleCloseModal}>
+          <div className="space-y-6 max-h-[70vh] overflow-y-auto p-4 relative">
+            <p className="text-center text-sm md:text-base text-cyan-100/95 text-handwritten px-2">
+              A gentle, heavenly wall where our prayers rest like light—quiet, sacred, and heard.
+            </p>
+
+            <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
+              {[...Array(10)].map((_, i) => (
+                <span
+                  key={i}
+                  className="absolute text-base opacity-15 animate-float"
+                  style={{
+                    left: `${8 + (i * 13) % 86}%`,
+                    top: `${10 + (i * 9) % 78}%`,
+                    animationDuration: `${5 + (i % 3)}s`,
+                    animationDelay: `${i * 0.25}s`,
+                  }}
+                >
+                  ✧
+                </span>
+              ))}
+            </div>
+
+            <div className="relative z-10 space-y-6">
+              <PrayerWallField prayers={prayers} />
+              <PrayerForm onCreate={handleCreatePrayer} isSubmitting={isCreatingPrayer} />
+            </div>
+          </div>
+        </LocationModal>
+      )}
+
+      {activeLocation === 'chat-portal' && (
+        <LocationModal title="Portal Chat" onClose={handleCloseModal}>
+          <div className="max-h-[70vh] overflow-y-auto p-2 md:p-4">
+            <PortalChat context="world" />
           </div>
         </LocationModal>
       )}
@@ -1041,6 +1173,195 @@ function WishForm({
       >
         {isSubmitting ? 'Sending to the stars…' : 'Send to the stars ✨'}
       </button>
+    </form>
+  )
+}
+
+// Prayer Wall — heavenly list of prayers
+function PrayerWallField({ prayers }: { prayers: Prayer[] }) {
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+
+  if (!prayers.length) {
+    return (
+      <div className="text-center py-10 rounded-2xl border border-cyan-300/20 bg-gradient-to-br from-slate-950/40 via-indigo-950/30 to-pink-950/20">
+        <p className="text-cyan-100/90 text-handwritten text-lg">No prayers yet.</p>
+        <p className="text-purple-200/70 text-sm mt-2">
+          Leave the first one—something soft, hopeful, and meant for us.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <span className="flex-1 h-px bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent" />
+        <span className="text-xs uppercase tracking-widest text-cyan-200/80">Our prayers</span>
+        <span className="flex-1 h-px bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent" />
+      </div>
+
+      <div className="grid grid-cols-1 gap-3">
+        {prayers.slice(0, 40).map((p) => {
+          const expanded = expandedId === p.id
+          const author =
+            p.author_role === 'gf'
+              ? 'Her'
+              : p.author_role === 'bf'
+                ? 'Him'
+                : p.author_role
+          const badgeColor =
+            p.author_role === 'gf'
+              ? 'bg-pink-500/15 text-pink-200 border-pink-400/20'
+              : 'bg-cyan-500/15 text-cyan-100 border-cyan-300/20'
+
+          return (
+            <button
+              type="button"
+              key={p.id}
+              onClick={() => setExpandedId((prev) => (prev === p.id ? null : p.id))}
+              className="w-full text-left relative rounded-2xl border border-cyan-300/20 bg-gradient-to-br from-slate-950/40 via-indigo-950/30 to-pink-950/20 p-4 overflow-hidden hover:border-pink-300/35 transition-colors"
+            >
+              <div className="absolute inset-0 opacity-40 pointer-events-none bg-[radial-gradient(circle_at_10%_20%,rgba(34,211,238,0.10),transparent_55%),radial-gradient(circle_at_80%_80%,rgba(236,72,153,0.08),transparent_60%)]" />
+              <div className="relative">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <span className={`text-[11px] px-2 py-1 rounded-full border ${badgeColor}`}>
+                    {author}
+                  </span>
+                  <span className="text-[11px] text-purple-200/70">
+                    {p.created_at ? formatDateInPH(p.created_at) : ''}
+                  </span>
+                </div>
+                <p className={`text-sm text-purple-100 whitespace-pre-wrap leading-relaxed ${expanded ? '' : 'line-clamp-4'}`}>
+                  {p.message}
+                </p>
+                <p className="mt-3 text-xs text-cyan-100/70 italic">
+                  {expanded ? 'Tap to fold' : 'Tap to expand'}
+                </p>
+              </div>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function PrayerForm({
+  onCreate,
+  isSubmitting,
+}: {
+  onCreate: (message: string) => Promise<void> | void
+  isSubmitting: boolean
+}) {
+  const [value, setValue] = useState('')
+  const role = typeof window !== 'undefined' ? localStorage.getItem('userRole') : null
+  const canPost = role === 'gf' || role === 'admin' || role === 'bf'
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const trimmed = value.trim()
+    if (!trimmed || isSubmitting || !canPost) return
+    await onCreate(trimmed)
+    setValue('')
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="rounded-2xl border border-cyan-300/20 bg-gradient-to-br from-slate-950/40 via-indigo-950/30 to-pink-950/20 p-4 md:p-5 space-y-3"
+    >
+      <div className="flex items-center gap-2">
+        <span className="text-xl">🕯️</span>
+        <p className="text-cyan-100/90 text-sm font-medium">
+          {canPost ? 'Leave a prayer' : 'Log in to leave a prayer'}
+        </p>
+      </div>
+      <textarea
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        rows={3}
+        maxLength={5000}
+        placeholder={canPost ? 'Write a prayer for us…' : 'Only GF and BF can write prayers here.'}
+        disabled={!canPost || isSubmitting}
+        className="w-full px-4 py-3 rounded-xl bg-slate-950/40 border border-cyan-300/20 text-purple-50 placeholder-purple-200/40 focus:outline-none focus:border-pink-300/40 focus:ring-2 focus:ring-cyan-300/10 transition-all duration-300 resize-none"
+      />
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-xs text-purple-200/60">{value.length}/5000</span>
+        <button
+          type="submit"
+          disabled={!canPost || isSubmitting || !value.trim()}
+          className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-400/80 to-pink-500/80 text-slate-950 font-semibold text-sm hover:from-cyan-300 hover:to-pink-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-[0_0_24px_rgba(34,211,238,0.18)]"
+        >
+          {isSubmitting ? 'Sending…' : 'Offer prayer'}
+        </button>
+      </div>
+    </form>
+  )
+}
+
+function LoveLetterWriteForm({
+  onCreate,
+  isSubmitting,
+}: {
+  onCreate: (title: string, content: string) => Promise<void> | void
+  isSubmitting: boolean
+}) {
+  const role = typeof window !== 'undefined' ? localStorage.getItem('userRole') : null
+  const canWrite = role === 'gf'
+  const [title, setTitle] = useState('')
+  const [content, setContent] = useState('')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!canWrite || isSubmitting) return
+    const t = title.trim()
+    const c = content.trim()
+    if (!t || !c) return
+    await onCreate(t, c)
+    setTitle('')
+    setContent('')
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="rounded-2xl border border-pink-500/20 bg-purple-900/20 p-4 md:p-5 space-y-3"
+    >
+      <div className="flex items-center gap-2">
+        <span className="text-xl">💌</span>
+        <p className="text-pink-200/90 text-sm font-medium">
+          {canWrite ? 'Write a letter' : 'Only she can write here'}
+        </p>
+      </div>
+      <input
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        maxLength={120}
+        placeholder={canWrite ? 'Title…' : 'Log in as GF to write a letter.'}
+        disabled={!canWrite || isSubmitting}
+        className="w-full rounded-xl bg-purple-950/40 border border-pink-500/30 px-4 py-2.5 text-sm text-white placeholder-purple-300/70 focus:outline-none focus:border-pink-400 focus:ring-1 focus:ring-pink-400/25 transition-all"
+      />
+      <textarea
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        rows={4}
+        maxLength={3000}
+        placeholder={canWrite ? 'Write your letter…' : 'Only GF can write letters here.'}
+        disabled={!canWrite || isSubmitting}
+        className="w-full rounded-xl bg-purple-950/40 border border-pink-500/30 px-4 py-3 text-sm text-white placeholder-purple-300/70 focus:outline-none focus:border-pink-400 focus:ring-1 focus:ring-pink-400/25 transition-all resize-none"
+      />
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-xs text-purple-200/60">
+          {content.length}/3000
+        </span>
+        <button
+          type="submit"
+          disabled={!canWrite || isSubmitting || !title.trim() || !content.trim()}
+          className="px-4 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-semibold hover:from-pink-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-[0_0_20px_rgba(236,72,153,0.25)]"
+        >
+          {isSubmitting ? 'Saving…' : 'Seal letter'}
+        </button>
+      </div>
     </form>
   )
 }

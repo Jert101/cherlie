@@ -10,9 +10,11 @@ import * as THREE from 'three'
 
 interface PlanetSceneProps {
   onEnterWorld: () => void
+  showSpecialStar?: boolean
+  onSpecialStarClick?: () => void
 }
 
-export default function PlanetScene({ onEnterWorld }: PlanetSceneProps) {
+export default function PlanetScene({ onEnterWorld, showSpecialStar = false, onSpecialStarClick }: PlanetSceneProps) {
   const { size } = useThree()
   const planetRef = useRef<Group>(null)
   const rocketRef = useRef<Group>(null)
@@ -20,6 +22,7 @@ export default function PlanetScene({ onEnterWorld }: PlanetSceneProps) {
   const [settings, setSettings] = useState<SiteSettings | null>(null)
   const [memories, setMemories] = useState<Memory[]>([])
   const [hovered, setHovered] = useState(false)
+  const [starHovered, setStarHovered] = useState(false)
 
   const isNarrow = size.width < 768
   const isSmall = size.width < 480
@@ -348,6 +351,52 @@ export default function PlanetScene({ onEnterWorld }: PlanetSceneProps) {
         ))}
       </group>
 
+      {/* Special Day Star — big bright clickable */}
+      {showSpecialStar && (
+        <Float speed={1.6} rotationIntensity={0.5} floatIntensity={0.9}>
+          <group
+            position={[4.2, 3.1, -2.2]}
+            onClick={(e) => {
+              e.stopPropagation()
+              onSpecialStarClick?.()
+            }}
+            onPointerOver={(e) => {
+              e.stopPropagation()
+              setStarHovered(true)
+              document.body.style.cursor = 'pointer'
+            }}
+            onPointerOut={(e) => {
+              e.stopPropagation()
+              setStarHovered(false)
+              document.body.style.cursor = 'auto'
+            }}
+          >
+            <pointLight intensity={starHovered ? 2.2 : 1.6} color="#FDE68A" distance={18} />
+            <mesh>
+              <icosahedronGeometry args={[0.65, 0]} />
+              <meshStandardMaterial
+                color="#FDE68A"
+                emissive="#FBBF24"
+                emissiveIntensity={starHovered ? 2.2 : 1.6}
+                roughness={0.25}
+                metalness={0.15}
+              />
+            </mesh>
+            {/* Outer glow */}
+            <mesh raycast={() => null}>
+              <sphereGeometry args={[0.95, 24, 24]} />
+              <meshStandardMaterial
+                color="#FDE68A"
+                emissive="#F472B6"
+                emissiveIntensity={starHovered ? 0.9 : 0.65}
+                transparent
+                opacity={starHovered ? 0.25 : 0.18}
+                side={2}
+              />
+            </mesh>
+          </group>
+        </Float>
+      )}
     </>
   )
 }

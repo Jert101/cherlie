@@ -48,6 +48,9 @@ export default function SettingsPanel() {
           gf_code: settings.gf_code,
           admin_code: settings.admin_code,
           bf_code: settings.bf_code || null,
+          special_star_enabled: !!settings.special_star_enabled,
+          special_star_date: settings.special_star_date || null,
+          special_star_message: settings.special_star_message || null,
           time_lock_enabled: settings.time_lock_enabled,
           unlock_date: settings.unlock_date || null,
           music_url: settings.music_url || null,
@@ -213,6 +216,53 @@ export default function SettingsPanel() {
           <p className="text-xs text-purple-300 mt-1">
             When used, enters the world as a hidden &quot;bf&quot; role (she won&apos;t see this).
           </p>
+        </div>
+
+        <div className="rounded-2xl border border-cyan-300/20 bg-purple-900/30 p-4">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">✨</span>
+              <h3 className="text-lg font-semibold text-cyan-100">Special Day Star (Planet)</h3>
+            </div>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={!!settings.special_star_enabled}
+                onChange={(e) => setSettings({ ...settings, special_star_enabled: e.target.checked })}
+                className="w-4 h-4 rounded"
+              />
+              <span className="text-purple-200 text-sm">Enable</span>
+            </label>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-purple-200 mb-2">Show on date (Philippines)</label>
+              <input
+                type="date"
+                value={settings.special_star_date || ''}
+                onChange={(e) => setSettings({ ...settings, special_star_date: e.target.value || null })}
+                className="w-full px-4 py-2 rounded-lg bg-purple-800/50 border border-purple-500/50 text-white focus:outline-none focus:border-pink-500"
+              />
+              <p className="text-xs text-purple-300 mt-1">
+                The star appears on <span className="text-cyan-200">/planet</span> when PH date matches this.
+              </p>
+            </div>
+            <div>
+              <label className="block text-purple-200 mb-2">Message</label>
+              <textarea
+                value={settings.special_star_message || ''}
+                onChange={(e) => setSettings({ ...settings, special_star_message: e.target.value })}
+                rows={3}
+                maxLength={1200}
+                className="w-full px-4 py-2 rounded-lg bg-purple-800/50 border border-purple-500/50 text-white focus:outline-none focus:border-pink-500"
+                placeholder="Write the message she will see when she taps the star…"
+              />
+              <p className="text-xs text-purple-300 mt-1">
+                {(settings.special_star_message || '').length}/1200 characters
+              </p>
+            </div>
+          </div>
         </div>
 
         <div>

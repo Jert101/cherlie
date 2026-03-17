@@ -38,6 +38,15 @@ CREATE TABLE IF NOT EXISTS surprises (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Prayers table (Prayer Wall)
+CREATE TABLE IF NOT EXISTS prayers (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  message TEXT NOT NULL,
+  author_role TEXT NOT NULL DEFAULT 'gf',
+  visible BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Games table
 CREATE TABLE IF NOT EXISTS games (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -55,6 +64,9 @@ CREATE TABLE IF NOT EXISTS site_settings (
   gf_name VARCHAR(255) DEFAULT 'baby',
   gf_code VARCHAR(100) DEFAULT 'love2024',
   admin_code VARCHAR(100) DEFAULT 'admin2024',
+  special_star_enabled BOOLEAN DEFAULT false,
+  special_star_date DATE,
+  special_star_message TEXT,
   time_lock_enabled BOOLEAN DEFAULT false,
   unlock_date TIMESTAMP WITH TIME ZONE,
   music_url TEXT,
@@ -101,6 +113,8 @@ CREATE INDEX IF NOT EXISTS idx_letters_order ON letters(order_index);
 CREATE INDEX IF NOT EXISTS idx_letters_visible ON letters(visible);
 CREATE INDEX IF NOT EXISTS idx_surprises_visible ON surprises(visible);
 CREATE INDEX IF NOT EXISTS idx_games_enabled ON games(enabled);
+CREATE INDEX IF NOT EXISTS idx_prayers_created_at ON prayers(created_at);
+CREATE INDEX IF NOT EXISTS idx_prayers_visible ON prayers(visible);
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE memories ENABLE ROW LEVEL SECURITY;
@@ -108,6 +122,7 @@ ALTER TABLE letters ENABLE ROW LEVEL SECURITY;
 ALTER TABLE surprises ENABLE ROW LEVEL SECURITY;
 ALTER TABLE games ENABLE ROW LEVEL SECURITY;
 ALTER TABLE site_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE prayers ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies: Allow public read access to visible content
 -- Drop existing policies if they exist, then create new ones
@@ -126,6 +141,14 @@ CREATE POLICY "Allow public read visible surprises" ON surprises
 DROP POLICY IF EXISTS "Allow public read enabled games" ON games;
 CREATE POLICY "Allow public read enabled games" ON games
   FOR SELECT USING (enabled = true);
+
+DROP POLICY IF EXISTS "Prayers are viewable when visible" ON prayers;
+CREATE POLICY "Prayers are viewable when visible" ON prayers
+  FOR SELECT USING (visible = true);
+
+DROP POLICY IF EXISTS "Allow read all prayers for admin" ON prayers;
+CREATE POLICY "Allow read all prayers for admin" ON prayers
+  FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Allow public read site settings" ON site_settings;
 CREATE POLICY "Allow public read site settings" ON site_settings
@@ -175,6 +198,19 @@ CREATE POLICY "Allow public update surprises" ON surprises
 
 DROP POLICY IF EXISTS "Allow public delete surprises" ON surprises;
 CREATE POLICY "Allow public delete surprises" ON surprises
+  FOR DELETE USING (true);
+
+-- Prayers policies
+DROP POLICY IF EXISTS "Anyone can insert prayers" ON prayers;
+CREATE POLICY "Anyone can insert prayers" ON prayers
+  FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow public update prayers" ON prayers;
+CREATE POLICY "Allow public update prayers" ON prayers
+  FOR UPDATE USING (true);
+
+DROP POLICY IF EXISTS "Allow public delete prayers" ON prayers;
+CREATE POLICY "Allow public delete prayers" ON prayers
   FOR DELETE USING (true);
 
 -- Games policies
